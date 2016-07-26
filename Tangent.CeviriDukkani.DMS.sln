@@ -1,0 +1,64 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 14
+VisualStudioVersion = 14.0.25420.1
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DMS.Business", "DMS.Business\DMS.Business.csproj", "{C801D48C-CDDB-4084-9742-D033A58CA1C9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DMS.Tests", "DMS.Tests\DMS.Tests.csproj", "{9A0AD816-3E62-4FC9-B4C7-5F3A79454878}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DMS.Api", "DMS.Api\DMS.Api.csproj", "{2F2B607F-175C-4040-A60E-E154804C8957}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ExternalFiles", "ExternalFiles", "{ED1EE2F2-02C1-4536-9F94-C08E04A8F758}"
+	ProjectSection(SolutionItems) = preProject
+		ExternalFiles\ToxyRelease\DCSoft.RTF.dll = ExternalFiles\ToxyRelease\DCSoft.RTF.dll
+		ExternalFiles\ToxyRelease\DCSoft.RTF.xml = ExternalFiles\ToxyRelease\DCSoft.RTF.xml
+		ExternalFiles\ToxyRelease\dmach.Mail.dll = ExternalFiles\ToxyRelease\dmach.Mail.dll
+		ExternalFiles\ToxyRelease\DocumentFormat.OpenXml.dll = ExternalFiles\ToxyRelease\DocumentFormat.OpenXml.dll
+		ExternalFiles\ToxyRelease\DocumentFormat.OpenXml.xml = ExternalFiles\ToxyRelease\DocumentFormat.OpenXml.xml
+		ExternalFiles\ToxyRelease\HtmlAgilityPack.dll = ExternalFiles\ToxyRelease\HtmlAgilityPack.dll
+		ExternalFiles\ToxyRelease\HtmlAgilityPack.xml = ExternalFiles\ToxyRelease\HtmlAgilityPack.xml
+		ExternalFiles\ToxyRelease\ICSharpCode.SharpZipLib.dll = ExternalFiles\ToxyRelease\ICSharpCode.SharpZipLib.dll
+		ExternalFiles\ToxyRelease\itextsharp.dll = ExternalFiles\ToxyRelease\itextsharp.dll
+		ExternalFiles\ToxyRelease\itextsharp.xml = ExternalFiles\ToxyRelease\itextsharp.xml
+		ExternalFiles\ToxyRelease\LumenWorks.Framework.IO.dll = ExternalFiles\ToxyRelease\LumenWorks.Framework.IO.dll
+		ExternalFiles\ToxyRelease\LumenWorks.Framework.IO.xml = ExternalFiles\ToxyRelease\LumenWorks.Framework.IO.xml
+		ExternalFiles\ToxyRelease\MsgReader.dll = ExternalFiles\ToxyRelease\MsgReader.dll
+		ExternalFiles\ToxyRelease\MsgReader.xml = ExternalFiles\ToxyRelease\MsgReader.xml
+		ExternalFiles\ToxyRelease\NPOI.dll = ExternalFiles\ToxyRelease\NPOI.dll
+		ExternalFiles\ToxyRelease\NPOI.OOXML.dll = ExternalFiles\ToxyRelease\NPOI.OOXML.dll
+		ExternalFiles\ToxyRelease\NPOI.OOXML.xml = ExternalFiles\ToxyRelease\NPOI.OOXML.xml
+		ExternalFiles\ToxyRelease\NPOI.OpenXml4Net.dll = ExternalFiles\ToxyRelease\NPOI.OpenXml4Net.dll
+		ExternalFiles\ToxyRelease\NPOI.OpenXml4Net.xml = ExternalFiles\ToxyRelease\NPOI.OpenXml4Net.xml
+		ExternalFiles\ToxyRelease\NPOI.OpenXmlFormats.dll = ExternalFiles\ToxyRelease\NPOI.OpenXmlFormats.dll
+		ExternalFiles\ToxyRelease\NPOI.ScratchPad.HWPF.dll = ExternalFiles\ToxyRelease\NPOI.ScratchPad.HWPF.dll
+		ExternalFiles\ToxyRelease\NPOI.xml = ExternalFiles\ToxyRelease\NPOI.xml
+		ExternalFiles\ToxyRelease\taglib-sharp.dll = ExternalFiles\ToxyRelease\taglib-sharp.dll
+		ExternalFiles\ToxyRelease\Thought.vCards.dll = ExternalFiles\ToxyRelease\Thought.vCards.dll
+		ExternalFiles\ToxyRelease\Toxy.dll = ExternalFiles\ToxyRelease\Toxy.dll
+		ExternalFiles\ToxyRelease\Toxy.dll.config = ExternalFiles\ToxyRelease\Toxy.dll.config
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{C801D48C-CDDB-4084-9742-D033A58CA1C9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C801D48C-CDDB-4084-9742-D033A58CA1C9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C801D48C-CDDB-4084-9742-D033A58CA1C9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C801D48C-CDDB-4084-9742-D033A58CA1C9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9A0AD816-3E62-4FC9-B4C7-5F3A79454878}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9A0AD816-3E62-4FC9-B4C7-5F3A79454878}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9A0AD816-3E62-4FC9-B4C7-5F3A79454878}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9A0AD816-3E62-4FC9-B4C7-5F3A79454878}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2F2B607F-175C-4040-A60E-E154804C8957}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2F2B607F-175C-4040-A60E-E154804C8957}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2F2B607F-175C-4040-A60E-E154804C8957}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2F2B607F-175C-4040-A60E-E154804C8957}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
