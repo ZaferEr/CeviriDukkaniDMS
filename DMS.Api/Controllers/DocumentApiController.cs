@@ -1,44 +1,23 @@
 ﻿using System;
+using System.Configuration;
 using System.Net;
 using System.Net.Http;
-using System.Net.Http.Formatting;
 using System.Web;
 using System.Web.Http;
+using DMS.Api.Helpers;
 using DMS.Business;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Serialization;
 using Tangent.CeviriDukkani.Domain.Common;
 using Tangent.CeviriDukkani.Domain.Dto.Document;
+using Tangent.CeviriDukkani.Domain.Dto.Response;
+using Tangent.CeviriDukkani.WebCore.BaseControllers;
 
 namespace DMS.Api.Controllers {
-    [RoutePrefix("api/v1/documentapi")]
-    public class DocumentApiController : ApiController {
-
-        public JsonMediaTypeFormatter Formatter = new JsonMediaTypeFormatter {
-            SerializerSettings = new JsonSerializerSettings {
-                ContractResolver = new CamelCasePropertyNamesContractResolver()
-            }
-        };
-
+    [RoutePrefix("api/documentapi")]
+    public class DocumentApiController : BaseApiController {
         private readonly IDocumentService _documentService;
 
         public DocumentApiController(IDocumentService documentService) {
             _documentService = documentService;
-        }
-
-        [HttpPost, Route("addDocument")]
-        public HttpResponseMessage AddDocument(TranslationDocumentDto documentDto) {
-            var response = new HttpResponseMessage();
-            var serviceResult = _documentService.AddDocument(documentDto, 1);
-
-            if (serviceResult.ServiceResultType != ServiceResultType.Success) {
-                response.StatusCode = HttpStatusCode.InternalServerError;
-                return response;
-            }
-
-            response.StatusCode = HttpStatusCode.OK;
-            response.Content = new ObjectContent(serviceResult.Data.GetType(), serviceResult.Data, new JsonMediaTypeFormatter());
-            return response;
         }
 
         [HttpPost, Route("uploadDocument")]
@@ -51,49 +30,150 @@ namespace DMS.Api.Controllers {
                 var postedFile = httpRequest.Files[0];
                 var fileExtension = postedFile.FileName.GetExtensionOfFile();
                 var newGuid = Guid.NewGuid();
-                var filePath = "~/Areas/Admin/Uploads/" + newGuid + "." + fileExtension;
+                var filePath = ConfigurationManager.AppSettings["UploadDocumentPath"] + newGuid + "." + fileExtension;
                 var localPath = HttpContext.Current.Server.MapPath(filePath);
                 postedFile.SaveAs(localPath);
                 // NOTE: To store in memory use postedFile.InputStream
 
-                //ServiceResult<DocumentUploadResponseDto> uploadResponseDto = _documentService.AnalyzeDocument(localPath, filePath);
+                ServiceResult<DocumentUploadResponseDto> uploadResponseDto = _documentService.AnalyzeDocument(localPath, filePath);
 
                 // Send OK Response along with saved file names to the client.
-                return Request.CreateResponse(HttpStatusCode.OK, filePath);
+                return Request.CreateResponse(HttpStatusCode.OK, uploadResponseDto);
             } catch (System.Exception e) {
                 return Request.CreateErrorResponse(HttpStatusCode.InternalServerError, e);
             }
         }
 
-        [HttpPost, Route("editDocument")]
-        public HttpResponseMessage EditDocument(TranslationDocumentDto documentDto) {
-            var response = new HttpResponseMessage();
-            var serviceResult = _documentService.EditDocument(documentDto, 1);
+        [HttpPost, Route("addTranslationDocument")]
+        public HttpResponseMessage AddTranslationDocument(TranslationDocumentDto documentDto) {
+            var serviceResult = _documentService.AddTranslationDocument(documentDto, SessionUser.User.Id);
 
-            if (serviceResult.ServiceResultType != ServiceResultType.Success) {
-                response.StatusCode = HttpStatusCode.InternalServerError;
-                return response;
-            }
+            if (serviceResult.ServiceResultType != ServiceResultType.Success)
+                return Error();
 
-            response.StatusCode = HttpStatusCode.OK;
-            response.Content = new ObjectContent(serviceResult.Data.GetType(), serviceResult.Data, new JsonMediaTypeFormatter());
-            return response;
+            return OK(serviceResult.Data);
         }
 
-        [HttpGet, Route("getDocuments")]
-        public HttpResponseMessage GetDocuments() {
-            var response = new HttpResponseMessage();
-            var serviceResult = _documentService.GetDocuments();
+        [HttpPost, Route("editTranslationDocument")]
+        public HttpResponseMessage EditTranslationDocument(TranslationDocumentDto documentDto) {
+            var serviceResult = _documentService.EditTranslationDocument(documentDto, SessionUser.User.Id);
 
-            if (serviceResult.ServiceResultType != ServiceResultType.Success) {
-                response.StatusCode = HttpStatusCode.InternalServerError;
-                return response;
-            }
+            if (serviceResult.ServiceResultType != ServiceResultType.Success)
+                return Error();
 
-            response.StatusCode = HttpStatusCode.OK;
-            response.Content = new ObjectContent(serviceResult.Data.GetType(), serviceResult.Data, Formatter);
-            return response;
+            return OK(serviceResult.Data);
         }
+
+        [HttpGet, Route("getTranslationDocuments")]
+        public HttpResponseMessage GetTranslationDocuments() {
+            var serviceResult = _documentService.GetTranslationDocuments();
+
+            if (serviceResult.ServiceResultType != ServiceResultType.Success)
+                return Error();
+
+            return OK(serviceResult.Data);
+        }
+
+        [HttpGet, Route("getTranslationDocument/{id}")]
+        public HttpResponseMessage GetTranslationDocument(int id) {
+            var serviceResult = _documentService.GetTranslationDocument(id);
+
+            if (serviceResult.ServiceResultType != ServiceResultType.Success)
+                return Error();
+
+            return OK(serviceResult.Data);
+        }
+
+        [HttpPost, Route("addGeneralDocument")]
+        public HttpResponseMessage AddGeneralDocument(GeneralDocumentDto documentDto) {
+            var serviceResult = _documentService.AddGeneralDocument(documentDto, SessionUser.User.Id);
+
+            if (serviceResult.ServiceResultType != ServiceResultType.Success)
+                return Error();
+
+            return OK(serviceResult.Data);
+        }
+
+        [HttpPost, Route("editGeneralDocument")]
+        public HttpResponseMessage EditGeneralDocument(GeneralDocumentDto documentDto) {
+            var serviceResult = _documentService.EditGeneralDocument(documentDto, SessionUser.User.Id);
+
+            if (serviceResult.ServiceResultType != ServiceResultType.Success)
+                return Error();
+
+            return OK(serviceResult.Data);
+        }
+
+        [HttpGet, Route("getGeneralDocuments")]
+        public HttpResponseMessage GetGeneralDocuments() {
+            var serviceResult = _documentService.GetGeneralDocuments();
+
+            if (serviceResult.ServiceResultType != ServiceResultType.Success)
+                return Error();
+
+            return OK(serviceResult.Data);
+        }
+
+        [HttpGet, Route("getGeneralDocument/{id}")]
+        public HttpResponseMessage GetGeneralDocument(int id) {
+            var serviceResult = _documentService.GetGeneralDocument(id);
+
+            if (serviceResult.ServiceResultType != ServiceResultType.Success)
+                return Error();
+
+            return OK(serviceResult.Data);
+        }
+
+        [HttpPost, Route("addUserDocument")]
+        public HttpResponseMessage AddUserDocument(UserDocumentDto documentDto) {
+            var serviceResult = _documentService.AddUserDocument(documentDto, SessionUser.User.Id);
+
+            if (serviceResult.ServiceResultType != ServiceResultType.Success)
+                return Error();
+
+            return OK(serviceResult.Data);
+        }
+
+        [HttpPost, Route("editUserDocument")]
+        public HttpResponseMessage EditUserDocument(UserDocumentDto documentDto) {
+            var serviceResult = _documentService.EditUserDocument(documentDto, SessionUser.User.Id);
+
+            if (serviceResult.ServiceResultType != ServiceResultType.Success)
+                return Error();
+
+            return OK(serviceResult.Data);
+        }
+
+        [HttpGet, Route("getUserDocuments")]
+        public HttpResponseMessage GetUserDocuments() {
+            var serviceResult = _documentService.GetUserDocuments();
+
+            if (serviceResult.ServiceResultType != ServiceResultType.Success)
+                return Error();
+
+            return OK(serviceResult.Data);
+        }
+
+        [HttpGet, Route("getUserDocument/{id}")]
+        public HttpResponseMessage GetUserDocument(int id) {
+            var serviceResult = _documentService.GetUserDocument(id);
+
+            if (serviceResult.ServiceResultType != ServiceResultType.Success)
+                return Error();
+
+            return OK(serviceResult.Data);
+        }
+
+        [HttpPost, Route("getDocumentPartsNormalized")]
+        public HttpResponseMessage GetDocumentPartsNormalized(int translationDocumentId, int partCount) {
+            var serviceResult = _documentService.GetDocumentPartsNormalized(translationDocumentId, partCount, SessionUser.User.Id);
+
+            if (serviceResult.ServiceResultType != ServiceResultType.Success)
+                return Error();
+
+            return OK(serviceResult.Data);
+        }
+
     }
 
 }
