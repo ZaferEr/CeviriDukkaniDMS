@@ -3,7 +3,7 @@ using Tangent.CeviriDukkani.Domain.Common;
 using Tangent.CeviriDukkani.Domain.Dto.Document;
 using Tangent.CeviriDukkani.Domain.Dto.Response;
 
-namespace DMS.Business {
+namespace DMS.Business.Services {
     public interface IDocumentService {
         ServiceResult AddTranslationDocument(TranslationDocumentDto documentDto, int createdBy);
         ServiceResult<TranslationDocumentDto> GetTranslationDocument(int documentId);

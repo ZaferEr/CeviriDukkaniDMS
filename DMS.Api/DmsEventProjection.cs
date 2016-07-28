@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using DMS.Business;
+using DMS.Business.Services;
+using log4net;
 using RabbitMQ.Client;
 using Tangent.CeviriDukkani.Domain.Common;
 using Tangent.CeviriDukkani.Domain.Dto.Enums;
@@ -19,10 +21,10 @@ namespace DMS.Api {
         private readonly IDispatchCommits _dispatcher;
         private readonly RabbitMqSubscription _consumer;
 
-        public DmsEventProjection(IConnection connection, IDocumentService documentService, IDispatchCommits dispatcher) {
+        public DmsEventProjection(IConnection connection, IDocumentService documentService, IDispatchCommits dispatcher,ILog logger) {
             _documentService = documentService;
             _dispatcher = dispatcher;
-            _consumer = new RabbitMqSubscription(connection, "Cev-Exchange");
+            _consumer = new RabbitMqSubscription(connection, "Cev-Exchange",logger);
             _consumer
                 .WithAppName("dms-projection")
                 .WithEvent<CreateDocumentPartEvent>(Handle);

@@ -6,6 +6,7 @@ using System.Web;
 using System.Web.Http;
 using DMS.Api.Helpers;
 using DMS.Business;
+using DMS.Business.Services;
 using Tangent.CeviriDukkani.Domain.Common;
 using Tangent.CeviriDukkani.Domain.Dto.Document;
 using Tangent.CeviriDukkani.Domain.Dto.Response;
