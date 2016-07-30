@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Autofac;
 using Autofac.Integration.WebApi;
 using DMS.Business;
+using DMS.Business.ExternalServices;
 using DMS.Business.Services;
 using log4net;
 using MassTransit;
@@ -40,7 +41,7 @@ namespace DMS.Api {
 
             CustomLogger.Logger.Info($"DMS service is down with projections {DateTime.Today}");
 
-            Container.Resolve<IConnection>().Close();
+            //Container.Resolve<IConnection>().Close();
         }
 
         public static void Bootstrapper() {
@@ -71,6 +72,7 @@ namespace DMS.Api {
 
         public static void RegisterBusiness(this ContainerBuilder builder) {
             builder.RegisterType<DocumentService>().As<IDocumentService>().InstancePerLifetimeScope();
+            builder.RegisterType<TranslationService>().As<ITranslationService>().InstancePerLifetimeScope();
         }
 
         public static void RegisterEvents(this ContainerBuilder builder, Settings settings) {
