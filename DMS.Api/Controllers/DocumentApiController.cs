@@ -47,12 +47,12 @@ namespace DMS.Api.Controllers {
 
         [HttpPost, Route("addTranslationDocument")]
         public HttpResponseMessage AddTranslationDocument(TranslationDocumentDto documentDto) {
-            var serviceResult = _documentService.AddTranslationDocument(documentDto, SessionUser.User.Id);
+            var serviceResult = _documentService.AddTranslationDocument(documentDto, 1);
 
             if (serviceResult.ServiceResultType != ServiceResultType.Success)
                 return Error();
 
-            return OK(serviceResult.Data);
+            return OK(serviceResult);
         }
 
         [HttpPost, Route("editTranslationDocument")]

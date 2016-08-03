@@ -27,10 +27,9 @@ namespace DMS.Business.Services {
             _customMapperConfiguration = customMapperConfiguration;
             _logger = logger;
         }
-
-
-        public ServiceResult AddTranslationDocument(TranslationDocumentDto documentDto, int createdBy) {
-            var serviceResult = new ServiceResult();
+        
+        public ServiceResult<TranslationDocumentDto> AddTranslationDocument(TranslationDocumentDto documentDto, int createdBy) {
+            var serviceResult = new ServiceResult<TranslationDocumentDto>();
             try {
                 documentDto.CreatedBy = createdBy;
                 documentDto.Active = true;
@@ -67,8 +66,8 @@ namespace DMS.Business.Services {
             return serviceResult;
         }
 
-        public ServiceResult EditTranslationDocument(TranslationDocumentDto documentDto, int createdBy) {
-            var serviceResult = new ServiceResult();
+        public ServiceResult<TranslationDocumentDto> EditTranslationDocument(TranslationDocumentDto documentDto, int createdBy) {
+            var serviceResult = new ServiceResult<TranslationDocumentDto>();
             try {
                 var document = _ceviriDukkaniModel.TranslationDocuments.FirstOrDefault(f => f.Id == documentDto.Id);
                 if (document == null) {
@@ -113,10 +112,9 @@ namespace DMS.Business.Services {
             }
             return serviceResult;
         }
-
-
-        public ServiceResult AddGeneralDocument(GeneralDocumentDto documentDto, int createdBy) {
-            var serviceResult = new ServiceResult();
+        
+        public ServiceResult<GeneralDocumentDto> AddGeneralDocument(GeneralDocumentDto documentDto, int createdBy) {
+            var serviceResult = new ServiceResult<GeneralDocumentDto>();
             try {
                 documentDto.CreatedBy = createdBy;
                 documentDto.Active = true;
@@ -153,8 +151,8 @@ namespace DMS.Business.Services {
             return serviceResult;
         }
 
-        public ServiceResult EditGeneralDocument(GeneralDocumentDto documentDto, int createdBy) {
-            var serviceResult = new ServiceResult();
+        public ServiceResult<GeneralDocumentDto> EditGeneralDocument(GeneralDocumentDto documentDto, int createdBy) {
+            var serviceResult = new ServiceResult<GeneralDocumentDto>();
             try {
                 var document = _ceviriDukkaniModel.GeneralDocuments.FirstOrDefault(f => f.Id == documentDto.Id);
                 if (document == null) {
@@ -195,10 +193,9 @@ namespace DMS.Business.Services {
             }
             return serviceResult;
         }
-
-
-        public ServiceResult AddUserDocument(UserDocumentDto documentDto, int createdBy) {
-            var serviceResult = new ServiceResult();
+        
+        public ServiceResult<UserDocumentDto> AddUserDocument(UserDocumentDto documentDto, int createdBy) {
+            var serviceResult = new ServiceResult<UserDocumentDto>();
             try {
                 documentDto.CreatedBy = createdBy;
                 documentDto.Active = true;
@@ -235,8 +232,8 @@ namespace DMS.Business.Services {
             return serviceResult;
         }
 
-        public ServiceResult EditUserDocument(UserDocumentDto documentDto, int createdBy) {
-            var serviceResult = new ServiceResult();
+        public ServiceResult<UserDocumentDto> EditUserDocument(UserDocumentDto documentDto, int createdBy) {
+            var serviceResult = new ServiceResult<UserDocumentDto>();
             try {
                 var document = _ceviriDukkaniModel.UserDocuments.FirstOrDefault(f => f.Id == documentDto.Id);
                 if (document == null) {
@@ -277,7 +274,6 @@ namespace DMS.Business.Services {
             }
             return serviceResult;
         }
-
 
         public ServiceResult<DocumentUploadResponseDto> AnalyzeDocument(string localFolder, string fileName) {
             var result = new DocumentUploadResponseDto();
