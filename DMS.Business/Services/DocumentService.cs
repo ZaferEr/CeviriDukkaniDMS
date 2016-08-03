@@ -34,8 +34,8 @@ namespace DMS.Business.Services
             _ceviriDukkaniModel = ceviriDukkaniModel;
             _customMapperConfiguration = customMapperConfiguration;
 
-            _client = new MongoClient();
-            _database = _client.GetDatabase(ConfigurationManager.AppSettings["MongoAuditCollection"]);
+            _client = new MongoClient(ConfigurationManager.AppSettings["MongoAuditStore"]); 
+             _database = _client.GetDatabase(ConfigurationManager.AppSettings["MongoAuditDatabase"]);
             _logger = logger;
         }
 
@@ -56,13 +56,13 @@ namespace DMS.Business.Services
 
                 var documentAudit = new DocumentAudit
                 {
-                    Message = $"Document with id #{document.Id} and name ${document.Name} added for translation.",
+                    Message = $"Document with id #{document.Id} and name {document.Name} added for translation.",
                     Status = "Document Added",
                     Date = DateTime.Now
                 };
 
-                var collection = _database.GetCollection<DocumentAudit>("translationDocumentAudit");
-                collection.InsertOne(documentAudit);
+                var collection = _database.GetCollection<DocumentAudit>(ConfigurationManager.AppSettings["MongoAuditCollection"]);
+                collection.InsertOneAsync(documentAudit);
 
                 serviceResult.ServiceResultType = ServiceResultType.Success;
                 serviceResult.Data = _customMapperConfiguration.GetMapDto<TranslationDocumentDto, TranslationDocument>(document);
@@ -127,13 +127,13 @@ namespace DMS.Business.Services
 
                 var documentAudit = new DocumentAudit
                 {
-                    Message = $"Document with id #{document.Id} and name ${document.Name} updated.",
+                    Message = $"Document with id #{document.Id} and name {document.Name} updated.",
                     Status = "Document Updated",
                     Date = DateTime.Now
                 };
 
-                var collection = _database.GetCollection<DocumentAudit>("translationDocumentAudit");
-                collection.InsertOne(documentAudit);
+                var collection = _database.GetCollection<DocumentAudit>(ConfigurationManager.AppSettings["MongoAuditCollection"]);
+                collection.InsertOneAsync(documentAudit);
 
                 serviceResult.ServiceResultType = ServiceResultType.Success;
                 serviceResult.Data = _customMapperConfiguration.GetMapDto<TranslationDocumentDto, TranslationDocument>(document);
@@ -455,13 +455,13 @@ namespace DMS.Business.Services
 
                 var documentAudit = new DocumentAudit
                 {
-                    Message = $"Document with id #{translationDocument.Id} and name ${translationDocument.Name} partitioned as {documentPartsFromDb.Count} part to translatrors.",
+                    Message = $"Document with id #{translationDocument.Id} and name {translationDocument.Name} partitioned as {documentPartsFromDb.Count} part to translatrors.",
                     Status = "Document Partitioned",
                     Date = DateTime.Now
                 };
 
-                var collection = _database.GetCollection<DocumentAudit>("translationDocumentAudit");
-                collection.InsertOne(documentAudit);
+                var collection = _database.GetCollection<DocumentAudit>(ConfigurationManager.AppSettings["MongoAuditCollection"]);
+                collection.InsertOneAsync(documentAudit);
 
                 serviceResult.ServiceResultType = ServiceResultType.Success;
                 serviceResult.Data = documentPartsFromDb.Select(x => _customMapperConfiguration.GetMapDto<TranslationDocumentPartDto, TranslationDocumentPart>(x)).ToList();
