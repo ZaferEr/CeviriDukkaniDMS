@@ -62,7 +62,7 @@ namespace DMS.Api.Controllers {
             if (serviceResult.ServiceResultType != ServiceResultType.Success)
                 return Error();
 
-            return OK(serviceResult.Data);
+            return OK(serviceResult);
         }
 
         [HttpGet, Route("getTranslationDocuments")]
@@ -72,7 +72,7 @@ namespace DMS.Api.Controllers {
             if (serviceResult.ServiceResultType != ServiceResultType.Success)
                 return Error();
 
-            return OK(serviceResult.Data);
+            return OK(serviceResult);
         }
 
         [HttpGet, Route("getTranslationDocument/{id}")]
@@ -82,7 +82,7 @@ namespace DMS.Api.Controllers {
             if (serviceResult.ServiceResultType != ServiceResultType.Success)
                 return Error();
 
-            return OK(serviceResult.Data);
+            return OK(serviceResult);
         }
 
         [HttpPost, Route("addGeneralDocument")]
@@ -92,7 +92,7 @@ namespace DMS.Api.Controllers {
             if (serviceResult.ServiceResultType != ServiceResultType.Success)
                 return Error();
 
-            return OK(serviceResult.Data);
+            return OK(serviceResult);
         }
 
         [HttpPost, Route("editGeneralDocument")]
@@ -102,7 +102,7 @@ namespace DMS.Api.Controllers {
             if (serviceResult.ServiceResultType != ServiceResultType.Success)
                 return Error();
 
-            return OK(serviceResult.Data);
+            return OK(serviceResult);
         }
 
         [HttpGet, Route("getGeneralDocuments")]
@@ -112,7 +112,7 @@ namespace DMS.Api.Controllers {
             if (serviceResult.ServiceResultType != ServiceResultType.Success)
                 return Error();
 
-            return OK(serviceResult.Data);
+            return OK(serviceResult);
         }
 
         [HttpGet, Route("getGeneralDocument/{id}")]
@@ -122,7 +122,7 @@ namespace DMS.Api.Controllers {
             if (serviceResult.ServiceResultType != ServiceResultType.Success)
                 return Error();
 
-            return OK(serviceResult.Data);
+            return OK(serviceResult);
         }
 
         [HttpPost, Route("addUserDocument")]
@@ -132,7 +132,7 @@ namespace DMS.Api.Controllers {
             if (serviceResult.ServiceResultType != ServiceResultType.Success)
                 return Error();
 
-            return OK(serviceResult.Data);
+            return OK(serviceResult);
         }
 
         [HttpPost, Route("editUserDocument")]
@@ -142,7 +142,7 @@ namespace DMS.Api.Controllers {
             if (serviceResult.ServiceResultType != ServiceResultType.Success)
                 return Error();
 
-            return OK(serviceResult.Data);
+            return OK(serviceResult);
         }
 
         [HttpGet, Route("getUserDocuments")]
@@ -152,7 +152,7 @@ namespace DMS.Api.Controllers {
             if (serviceResult.ServiceResultType != ServiceResultType.Success)
                 return Error();
 
-            return OK(serviceResult.Data);
+            return OK(serviceResult);
         }
 
         [HttpGet, Route("getUserDocument/{id}")]
@@ -162,7 +162,7 @@ namespace DMS.Api.Controllers {
             if (serviceResult.ServiceResultType != ServiceResultType.Success)
                 return Error();
 
-            return OK(serviceResult.Data);
+            return OK(serviceResult);
         }
 
         [HttpPost, Route("getDocumentPartsNormalized")]
@@ -172,9 +172,18 @@ namespace DMS.Api.Controllers {
             if (serviceResult.ServiceResultType != ServiceResultType.Success)
                 return Error();
 
-            return OK(serviceResult.Data);
+            return OK(serviceResult);
         }
 
+        [HttpGet, Route("getTranslationDocumentPartById")]
+        public HttpResponseMessage GetTranslationDocumentPartById([FromUri]int translationDocumentPartId) {
+            var serviceResult = _documentService.GetTranslationDocumentPartById(translationDocumentPartId);
+
+            if (serviceResult.ServiceResultType != ServiceResultType.Success)
+                return Error();
+
+            return OK(serviceResult);
+        }
     }
 
 }
