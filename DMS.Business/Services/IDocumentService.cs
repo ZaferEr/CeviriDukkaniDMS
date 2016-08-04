@@ -19,5 +19,7 @@ namespace DMS.Business.Services {
         ServiceResult<List<UserDocumentDto>> GetUserDocuments();
         ServiceResult<DocumentUploadResponseDto> AnalyzeDocument(string localFolder, string fileName);
         ServiceResult<List<TranslationDocumentPartDto>> GetDocumentPartsNormalized(int translationDocumentId, int partCount, int createdBy);
+        ServiceResult<TranslationDocumentPartDto> GetTranslationDocumentPartById(int translationDocumentPartId);
+
     }
 }

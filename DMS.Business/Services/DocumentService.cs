@@ -23,15 +23,14 @@ namespace DMS.Business.Services
     public class DocumentService : IDocumentService
     {
 
-        private readonly CeviriDukkaniModel _ceviriDukkaniModel;
+        private readonly CeviriDukkaniModel _model;
         private readonly CustomMapperConfiguration _customMapperConfiguration;
         private readonly ILog _logger;
         protected static IMongoClient _client;
         protected static IMongoDatabase _database;
 
-        public DocumentService(CeviriDukkaniModel ceviriDukkaniModel, CustomMapperConfiguration customMapperConfiguration, ILog logger)
-        {
-            _ceviriDukkaniModel = ceviriDukkaniModel;
+        public DocumentService(CeviriDukkaniModel model, CustomMapperConfiguration customMapperConfiguration,ILog logger) {
+            _model = model;
             _customMapperConfiguration = customMapperConfiguration;
 
             _client = new MongoClient(ConfigurationManager.AppSettings["MongoAuditStore"]); 
@@ -48,9 +47,8 @@ namespace DMS.Business.Services
                 documentDto.Active = true;
                 var document = _customMapperConfiguration.GetMapEntity<TranslationDocument, TranslationDocumentDto>(documentDto);
 
-                _ceviriDukkaniModel.TranslationDocuments.Add(document);
-                if (_ceviriDukkaniModel.SaveChanges() <= 0)
-                {
+                _model.TranslationDocuments.Add(document);
+                if (_model.SaveChanges() <= 0) {
                     throw new BusinessException(ExceptionCodes.UnableToInsert);
                 }
 
@@ -79,11 +77,9 @@ namespace DMS.Business.Services
         public ServiceResult<TranslationDocumentDto> GetTranslationDocument(int documentId)
         {
             var serviceResult = new ServiceResult<TranslationDocumentDto>();
-            try
-            {
-                var document = _ceviriDukkaniModel.TranslationDocuments.Find(documentId);
-                if (document == null)
-                {
+            try {
+                var document = _model.TranslationDocuments.Find(documentId);
+                if (document == null) {
                     throw new DbOperationException(ExceptionCodes.NoRelatedData);
                 }
                 serviceResult.ServiceResultType = ServiceResultType.Success;
@@ -101,11 +97,9 @@ namespace DMS.Business.Services
         public ServiceResult<TranslationDocumentDto> EditTranslationDocument(TranslationDocumentDto documentDto, int createdBy)
         {
             var serviceResult = new ServiceResult<TranslationDocumentDto>();
-            try
-            {
-                var document = _ceviriDukkaniModel.TranslationDocuments.FirstOrDefault(f => f.Id == documentDto.Id);
-                if (document == null)
-                {
+            try {
+                var document = _model.TranslationDocuments.FirstOrDefault(f => f.Id == documentDto.Id);
+                if (document == null) {
                     throw new DbOperationException(ExceptionCodes.NoRelatedData);
                 }
 
@@ -120,8 +114,7 @@ namespace DMS.Business.Services
                 document.UpdatedAt = DateTime.Now;
                 document.UpdatedBy = createdBy;
 
-                if (_ceviriDukkaniModel.SaveChanges() <= 0)
-                {
+                if (_model.SaveChanges() <= 0) {
                     throw new BusinessException(ExceptionCodes.UnableToUpdate);
                 }
 
@@ -150,9 +143,8 @@ namespace DMS.Business.Services
         public ServiceResult<List<TranslationDocumentDto>> GetTranslationDocuments()
         {
             var serviceResult = new ServiceResult<List<TranslationDocumentDto>>();
-            try
-            {
-                var documents = _ceviriDukkaniModel.TranslationDocuments.ToList();
+            try {
+                var documents = _model.TranslationDocuments.ToList();
 
                 serviceResult.ServiceResultType = ServiceResultType.Success;
                 serviceResult.Data = documents.Select(s => _customMapperConfiguration.GetMapDto<TranslationDocumentDto, TranslationDocument>(s)).ToList();
@@ -175,9 +167,8 @@ namespace DMS.Business.Services
                 documentDto.Active = true;
                 var document = _customMapperConfiguration.GetMapEntity<GeneralDocument, GeneralDocumentDto>(documentDto);
 
-                _ceviriDukkaniModel.GeneralDocuments.Add(document);
-                if (_ceviriDukkaniModel.SaveChanges() <= 0)
-                {
+                _model.GeneralDocuments.Add(document);
+                if (_model.SaveChanges() <= 0) {
                     throw new BusinessException(ExceptionCodes.UnableToInsert);
                 }
                 serviceResult.ServiceResultType = ServiceResultType.Success;
@@ -195,11 +186,9 @@ namespace DMS.Business.Services
         public ServiceResult<GeneralDocumentDto> GetGeneralDocument(int documentId)
         {
             var serviceResult = new ServiceResult<GeneralDocumentDto>();
-            try
-            {
-                var document = _ceviriDukkaniModel.GeneralDocuments.Find(documentId);
-                if (document == null)
-                {
+            try {
+                var document = _model.GeneralDocuments.Find(documentId);
+                if (document == null) {
                     throw new DbOperationException(ExceptionCodes.NoRelatedData);
                 }
                 serviceResult.ServiceResultType = ServiceResultType.Success;
@@ -217,11 +206,9 @@ namespace DMS.Business.Services
         public ServiceResult<GeneralDocumentDto> EditGeneralDocument(GeneralDocumentDto documentDto, int createdBy)
         {
             var serviceResult = new ServiceResult<GeneralDocumentDto>();
-            try
-            {
-                var document = _ceviriDukkaniModel.GeneralDocuments.FirstOrDefault(f => f.Id == documentDto.Id);
-                if (document == null)
-                {
+            try {
+                var document = _model.GeneralDocuments.FirstOrDefault(f => f.Id == documentDto.Id);
+                if (document == null) {
                     throw new DbOperationException(ExceptionCodes.NoRelatedData);
                 }
 
@@ -232,8 +219,7 @@ namespace DMS.Business.Services
                 document.UpdatedAt = DateTime.Now;
                 document.UpdatedBy = createdBy;
 
-                if (_ceviriDukkaniModel.SaveChanges() <= 0)
-                {
+                if (_model.SaveChanges() <= 0) {
                     throw new BusinessException(ExceptionCodes.UnableToUpdate);
                 }
                 serviceResult.ServiceResultType = ServiceResultType.Success;
@@ -251,9 +237,8 @@ namespace DMS.Business.Services
         public ServiceResult<List<GeneralDocumentDto>> GetGeneralDocuments()
         {
             var serviceResult = new ServiceResult<List<GeneralDocumentDto>>();
-            try
-            {
-                var documents = _ceviriDukkaniModel.GeneralDocuments.ToList();
+            try {
+                var documents = _model.GeneralDocuments.ToList();
 
                 serviceResult.ServiceResultType = ServiceResultType.Success;
                 serviceResult.Data = documents.Select(s => _customMapperConfiguration.GetMapDto<GeneralDocumentDto, GeneralDocument>(s)).ToList();
@@ -276,9 +261,8 @@ namespace DMS.Business.Services
                 documentDto.Active = true;
                 var document = _customMapperConfiguration.GetMapEntity<UserDocument, UserDocumentDto>(documentDto);
 
-                _ceviriDukkaniModel.UserDocuments.Add(document);
-                if (_ceviriDukkaniModel.SaveChanges() <= 0)
-                {
+                _model.UserDocuments.Add(document);
+                if (_model.SaveChanges() <= 0) {
                     throw new BusinessException(ExceptionCodes.UnableToInsert);
                 }
                 serviceResult.ServiceResultType = ServiceResultType.Success;
@@ -296,11 +280,9 @@ namespace DMS.Business.Services
         public ServiceResult<UserDocumentDto> GetUserDocument(int documentId)
         {
             var serviceResult = new ServiceResult<UserDocumentDto>();
-            try
-            {
-                var document = _ceviriDukkaniModel.UserDocuments.Find(documentId);
-                if (document == null)
-                {
+            try {
+                var document = _model.UserDocuments.Find(documentId);
+                if (document == null) {
                     throw new DbOperationException(ExceptionCodes.NoRelatedData);
                 }
                 serviceResult.ServiceResultType = ServiceResultType.Success;
@@ -318,11 +300,9 @@ namespace DMS.Business.Services
         public ServiceResult<UserDocumentDto> EditUserDocument(UserDocumentDto documentDto, int createdBy)
         {
             var serviceResult = new ServiceResult<UserDocumentDto>();
-            try
-            {
-                var document = _ceviriDukkaniModel.UserDocuments.FirstOrDefault(f => f.Id == documentDto.Id);
-                if (document == null)
-                {
+            try {
+                var document = _model.UserDocuments.FirstOrDefault(f => f.Id == documentDto.Id);
+                if (document == null) {
                     throw new DbOperationException(ExceptionCodes.NoRelatedData);
                 }
 
@@ -333,8 +313,7 @@ namespace DMS.Business.Services
                 document.UpdatedAt = DateTime.Now;
                 document.UpdatedBy = createdBy;
 
-                if (_ceviriDukkaniModel.SaveChanges() <= 0)
-                {
+                if (_model.SaveChanges() <= 0) {
                     throw new BusinessException(ExceptionCodes.UnableToUpdate);
                 }
                 serviceResult.ServiceResultType = ServiceResultType.Success;
@@ -352,9 +331,8 @@ namespace DMS.Business.Services
         public ServiceResult<List<UserDocumentDto>> GetUserDocuments()
         {
             var serviceResult = new ServiceResult<List<UserDocumentDto>>();
-            try
-            {
-                var documents = _ceviriDukkaniModel.UserDocuments.ToList();
+            try {
+                var documents = _model.UserDocuments.ToList();
 
                 serviceResult.ServiceResultType = ServiceResultType.Success;
                 serviceResult.Data = documents.Select(s => _customMapperConfiguration.GetMapDto<UserDocumentDto, UserDocument>(s)).ToList();
@@ -409,11 +387,9 @@ namespace DMS.Business.Services
         public ServiceResult<List<TranslationDocumentPartDto>> GetDocumentPartsNormalized(int translationDocumentId, int partCount, int createdBy)
         {
             var serviceResult = new ServiceResult<List<TranslationDocumentPartDto>>();
-            try
-            {
-                var translationDocument = _ceviriDukkaniModel.TranslationDocuments.Find(translationDocumentId);
-                if (translationDocument == null)
-                {
+            try {
+                var translationDocument = _model.TranslationDocuments.Find(translationDocumentId);
+                if (translationDocument == null) {
                     throw new BusinessException(ExceptionCodes.NoRelatedData);
                 }
 
@@ -444,12 +420,12 @@ namespace DMS.Business.Services
                 })
                 .ToList();
 
-                _ceviriDukkaniModel.TranslationDocumentParts.AddRange(documentParts);
+                _model.TranslationDocumentParts.AddRange(documentParts);
 
-                if (_ceviriDukkaniModel.SaveChanges() <= 0)
+                if (_model.SaveChanges() <= 0)
                     throw new BusinessException(ExceptionCodes.UnableToInsert);
 
-                var documentPartsFromDb = _ceviriDukkaniModel.TranslationDocumentParts
+                var documentPartsFromDb = _model.TranslationDocumentParts
                                                 .Where(x => x.TranslationDocumentId == translationDocumentId)
                                                 .ToList();
 
@@ -475,10 +451,23 @@ namespace DMS.Business.Services
             return serviceResult;
         }
 
-        private ITextParser GetTextParser(string filePath)
-        {
-            if (filePath.GetExtensionOfFile() == "txt")
-            {
+        public ServiceResult<TranslationDocumentPartDto> GetTranslationDocumentPartById(int translationDocumentPartId) {
+            var serviceResult = new ServiceResult<TranslationDocumentPartDto>();
+            try {
+                var translationDocumentPart = _model.TranslationDocumentParts.Find(translationDocumentPartId);
+
+                serviceResult.ServiceResultType = ServiceResultType.Success;
+                serviceResult.Data = _customMapperConfiguration.GetMapDto<TranslationDocumentPartDto,TranslationDocumentPart>(translationDocumentPart);
+            } catch (Exception exc) {
+                serviceResult.Exception = exc;
+                serviceResult.ServiceResultType = ServiceResultType.Fail;
+                _logger.Error($"Error occured in {MethodBase.GetCurrentMethod().Name} with exception message {exc.Message} and inner exception {exc.InnerException?.Message}");
+            }
+            return serviceResult;
+        }
+
+        private ITextParser GetTextParser(string filePath) {
+            if (filePath.GetExtensionOfFile() == "txt") {
                 return new PlainTextParser(new ParserContext(filePath));
             }
             throw new NotSupportedException("Bu doküman tipi desteklenmiyor.");
