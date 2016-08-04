@@ -165,7 +165,7 @@ namespace DMS.Api.Controllers {
             return OK(serviceResult.Data);
         }
 
-        [HttpPost, Route("getDocumentPartsNormalized")]
+        [HttpGet, Route("getDocumentPartsNormalized")]
         public HttpResponseMessage GetDocumentPartsNormalized(int translationDocumentId, int partCount) {
             var serviceResult = _documentService.GetDocumentPartsNormalized(translationDocumentId, partCount, SessionUser.User.Id);
 
