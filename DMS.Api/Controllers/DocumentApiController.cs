@@ -184,6 +184,17 @@ namespace DMS.Api.Controllers {
 
             return OK(serviceResult);
         }
+
+        [HttpGet, Route("analyzeDocument")]
+        public HttpResponseMessage AnalyzeDocument([FromUri]string localFolder, [FromUri]string fileName)
+        {
+            var serviceResult = _documentService.AnalyzeDocument(localFolder, fileName);
+
+            if (serviceResult.ServiceResultType != ServiceResultType.Success)
+                return Error();
+
+            return OK(serviceResult);
+        }
     }
 
 }
