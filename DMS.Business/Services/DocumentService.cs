@@ -1,13 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Linq;
 using System.Reflection;
 using DMS.Business.Extensions;
 using log4net;
+using MongoDB.Driver;
 using Tangent.CeviriDukkani.Data.Model;
 using Tangent.CeviriDukkani.Domain.Common;
 using Tangent.CeviriDukkani.Domain.Dto.Document;
 using Tangent.CeviriDukkani.Domain.Dto.Response;
+using Tangent.CeviriDukkani.Domain.Entities.Audit;
 using Tangent.CeviriDukkani.Domain.Entities.Document;
 using Tangent.CeviriDukkani.Domain.Exceptions;
 using Tangent.CeviriDukkani.Domain.Exceptions.ExceptionCodes;
@@ -15,22 +18,31 @@ using Tangent.CeviriDukkani.Domain.Mappers;
 using Toxy;
 using Toxy.Parsers;
 
-namespace DMS.Business.Services {
-    public class DocumentService : IDocumentService {
+namespace DMS.Business.Services
+{
+    public class DocumentService : IDocumentService
+    {
 
         private readonly CeviriDukkaniModel _model;
         private readonly CustomMapperConfiguration _customMapperConfiguration;
         private readonly ILog _logger;
+        protected static IMongoClient _client;
+        protected static IMongoDatabase _database;
 
         public DocumentService(CeviriDukkaniModel model, CustomMapperConfiguration customMapperConfiguration,ILog logger) {
             _model = model;
             _customMapperConfiguration = customMapperConfiguration;
+
+            _client = new MongoClient(ConfigurationManager.AppSettings["MongoAuditStore"]); 
+             _database = _client.GetDatabase(ConfigurationManager.AppSettings["MongoAuditDatabase"]);
             _logger = logger;
         }
-        
-        public ServiceResult<TranslationDocumentDto> AddTranslationDocument(TranslationDocumentDto documentDto, int createdBy) {
+
+        public ServiceResult<TranslationDocumentDto> AddTranslationDocument(TranslationDocumentDto documentDto, int createdBy)
+        {
             var serviceResult = new ServiceResult<TranslationDocumentDto>();
-            try {
+            try
+            {
                 documentDto.CreatedBy = createdBy;
                 documentDto.Active = true;
                 var document = _customMapperConfiguration.GetMapEntity<TranslationDocument, TranslationDocumentDto>(documentDto);
@@ -39,9 +51,22 @@ namespace DMS.Business.Services {
                 if (_model.SaveChanges() <= 0) {
                     throw new BusinessException(ExceptionCodes.UnableToInsert);
                 }
+
+                var documentAudit = new DocumentAudit
+                {
+                    Message = $"Document with id #{document.Id} and name {document.Name} added for translation.",
+                    Status = "Document Added",
+                    Date = DateTime.Now
+                };
+
+                var collection = _database.GetCollection<DocumentAudit>(ConfigurationManager.AppSettings["MongoAuditCollection"]);
+                collection.InsertOneAsync(documentAudit);
+
                 serviceResult.ServiceResultType = ServiceResultType.Success;
                 serviceResult.Data = _customMapperConfiguration.GetMapDto<TranslationDocumentDto, TranslationDocument>(document);
-            } catch (Exception exc) {
+            }
+            catch (Exception exc)
+            {
                 serviceResult.Exception = exc;
                 serviceResult.ServiceResultType = ServiceResultType.Fail;
                 _logger.Error($"Error occured in {MethodBase.GetCurrentMethod().Name} with exception message {exc.Message} and inner exception {exc.InnerException?.Message}");
@@ -49,7 +74,8 @@ namespace DMS.Business.Services {
             return serviceResult;
         }
 
-        public ServiceResult<TranslationDocumentDto> GetTranslationDocument(int documentId) {
+        public ServiceResult<TranslationDocumentDto> GetTranslationDocument(int documentId)
+        {
             var serviceResult = new ServiceResult<TranslationDocumentDto>();
             try {
                 var document = _model.TranslationDocuments.Find(documentId);
@@ -58,7 +84,9 @@ namespace DMS.Business.Services {
                 }
                 serviceResult.ServiceResultType = ServiceResultType.Success;
                 serviceResult.Data = _customMapperConfiguration.GetMapDto<TranslationDocumentDto, TranslationDocument>(document);
-            } catch (Exception exc) {
+            }
+            catch (Exception exc)
+            {
                 serviceResult.Exception = exc;
                 serviceResult.ServiceResultType = ServiceResultType.Fail;
                 _logger.Error($"Error occured in {MethodBase.GetCurrentMethod().Name} with exception message {exc.Message} and inner exception {exc.InnerException?.Message}");
@@ -66,7 +94,8 @@ namespace DMS.Business.Services {
             return serviceResult;
         }
 
-        public ServiceResult<TranslationDocumentDto> EditTranslationDocument(TranslationDocumentDto documentDto, int createdBy) {
+        public ServiceResult<TranslationDocumentDto> EditTranslationDocument(TranslationDocumentDto documentDto, int createdBy)
+        {
             var serviceResult = new ServiceResult<TranslationDocumentDto>();
             try {
                 var document = _model.TranslationDocuments.FirstOrDefault(f => f.Id == documentDto.Id);
@@ -88,9 +117,22 @@ namespace DMS.Business.Services {
                 if (_model.SaveChanges() <= 0) {
                     throw new BusinessException(ExceptionCodes.UnableToUpdate);
                 }
+
+                var documentAudit = new DocumentAudit
+                {
+                    Message = $"Document with id #{document.Id} and name {document.Name} updated.",
+                    Status = "Document Updated",
+                    Date = DateTime.Now
+                };
+
+                var collection = _database.GetCollection<DocumentAudit>(ConfigurationManager.AppSettings["MongoAuditCollection"]);
+                collection.InsertOneAsync(documentAudit);
+
                 serviceResult.ServiceResultType = ServiceResultType.Success;
                 serviceResult.Data = _customMapperConfiguration.GetMapDto<TranslationDocumentDto, TranslationDocument>(document);
-            } catch (Exception exc) {
+            }
+            catch (Exception exc)
+            {
                 serviceResult.Exception = exc;
                 serviceResult.ServiceResultType = ServiceResultType.Fail;
                 _logger.Error($"Error occured in {MethodBase.GetCurrentMethod().Name} with exception message {exc.Message} and inner exception {exc.InnerException?.Message}");
@@ -98,24 +140,29 @@ namespace DMS.Business.Services {
             return serviceResult;
         }
 
-        public ServiceResult<List<TranslationDocumentDto>> GetTranslationDocuments() {
+        public ServiceResult<List<TranslationDocumentDto>> GetTranslationDocuments()
+        {
             var serviceResult = new ServiceResult<List<TranslationDocumentDto>>();
             try {
                 var documents = _model.TranslationDocuments.ToList();
 
                 serviceResult.ServiceResultType = ServiceResultType.Success;
                 serviceResult.Data = documents.Select(s => _customMapperConfiguration.GetMapDto<TranslationDocumentDto, TranslationDocument>(s)).ToList();
-            } catch (Exception exc) {
+            }
+            catch (Exception exc)
+            {
                 serviceResult.Exception = exc;
                 serviceResult.ServiceResultType = ServiceResultType.Fail;
                 _logger.Error($"Error occured in {MethodBase.GetCurrentMethod().Name} with exception message {exc.Message} and inner exception {exc.InnerException?.Message}");
             }
             return serviceResult;
         }
-        
-        public ServiceResult<GeneralDocumentDto> AddGeneralDocument(GeneralDocumentDto documentDto, int createdBy) {
+
+        public ServiceResult<GeneralDocumentDto> AddGeneralDocument(GeneralDocumentDto documentDto, int createdBy)
+        {
             var serviceResult = new ServiceResult<GeneralDocumentDto>();
-            try {
+            try
+            {
                 documentDto.CreatedBy = createdBy;
                 documentDto.Active = true;
                 var document = _customMapperConfiguration.GetMapEntity<GeneralDocument, GeneralDocumentDto>(documentDto);
@@ -126,7 +173,9 @@ namespace DMS.Business.Services {
                 }
                 serviceResult.ServiceResultType = ServiceResultType.Success;
                 serviceResult.Data = _customMapperConfiguration.GetMapDto<GeneralDocumentDto, GeneralDocument>(document);
-            } catch (Exception exc) {
+            }
+            catch (Exception exc)
+            {
                 serviceResult.Exception = exc;
                 serviceResult.ServiceResultType = ServiceResultType.Fail;
                 _logger.Error($"Error occured in {MethodBase.GetCurrentMethod().Name} with exception message {exc.Message} and inner exception {exc.InnerException?.Message}");
@@ -134,7 +183,8 @@ namespace DMS.Business.Services {
             return serviceResult;
         }
 
-        public ServiceResult<GeneralDocumentDto> GetGeneralDocument(int documentId) {
+        public ServiceResult<GeneralDocumentDto> GetGeneralDocument(int documentId)
+        {
             var serviceResult = new ServiceResult<GeneralDocumentDto>();
             try {
                 var document = _model.GeneralDocuments.Find(documentId);
@@ -143,7 +193,9 @@ namespace DMS.Business.Services {
                 }
                 serviceResult.ServiceResultType = ServiceResultType.Success;
                 serviceResult.Data = _customMapperConfiguration.GetMapDto<GeneralDocumentDto, GeneralDocument>(document);
-            } catch (Exception exc) {
+            }
+            catch (Exception exc)
+            {
                 serviceResult.Exception = exc;
                 serviceResult.ServiceResultType = ServiceResultType.Fail;
                 _logger.Error($"Error occured in {MethodBase.GetCurrentMethod().Name} with exception message {exc.Message} and inner exception {exc.InnerException?.Message}");
@@ -151,7 +203,8 @@ namespace DMS.Business.Services {
             return serviceResult;
         }
 
-        public ServiceResult<GeneralDocumentDto> EditGeneralDocument(GeneralDocumentDto documentDto, int createdBy) {
+        public ServiceResult<GeneralDocumentDto> EditGeneralDocument(GeneralDocumentDto documentDto, int createdBy)
+        {
             var serviceResult = new ServiceResult<GeneralDocumentDto>();
             try {
                 var document = _model.GeneralDocuments.FirstOrDefault(f => f.Id == documentDto.Id);
@@ -171,7 +224,9 @@ namespace DMS.Business.Services {
                 }
                 serviceResult.ServiceResultType = ServiceResultType.Success;
                 serviceResult.Data = _customMapperConfiguration.GetMapDto<GeneralDocumentDto, GeneralDocument>(document);
-            } catch (Exception exc) {
+            }
+            catch (Exception exc)
+            {
                 serviceResult.Exception = exc;
                 serviceResult.ServiceResultType = ServiceResultType.Fail;
                 _logger.Error($"Error occured in {MethodBase.GetCurrentMethod().Name} with exception message {exc.Message} and inner exception {exc.InnerException?.Message}");
@@ -179,24 +234,29 @@ namespace DMS.Business.Services {
             return serviceResult;
         }
 
-        public ServiceResult<List<GeneralDocumentDto>> GetGeneralDocuments() {
+        public ServiceResult<List<GeneralDocumentDto>> GetGeneralDocuments()
+        {
             var serviceResult = new ServiceResult<List<GeneralDocumentDto>>();
             try {
                 var documents = _model.GeneralDocuments.ToList();
 
                 serviceResult.ServiceResultType = ServiceResultType.Success;
                 serviceResult.Data = documents.Select(s => _customMapperConfiguration.GetMapDto<GeneralDocumentDto, GeneralDocument>(s)).ToList();
-            } catch (Exception exc) {
+            }
+            catch (Exception exc)
+            {
                 serviceResult.Exception = exc;
                 serviceResult.ServiceResultType = ServiceResultType.Fail;
                 _logger.Error($"Error occured in {MethodBase.GetCurrentMethod().Name} with exception message {exc.Message} and inner exception {exc.InnerException?.Message}");
             }
             return serviceResult;
         }
-        
-        public ServiceResult<UserDocumentDto> AddUserDocument(UserDocumentDto documentDto, int createdBy) {
+
+        public ServiceResult<UserDocumentDto> AddUserDocument(UserDocumentDto documentDto, int createdBy)
+        {
             var serviceResult = new ServiceResult<UserDocumentDto>();
-            try {
+            try
+            {
                 documentDto.CreatedBy = createdBy;
                 documentDto.Active = true;
                 var document = _customMapperConfiguration.GetMapEntity<UserDocument, UserDocumentDto>(documentDto);
@@ -207,7 +267,9 @@ namespace DMS.Business.Services {
                 }
                 serviceResult.ServiceResultType = ServiceResultType.Success;
                 serviceResult.Data = _customMapperConfiguration.GetMapDto<UserDocumentDto, UserDocument>(document);
-            } catch (Exception exc) {
+            }
+            catch (Exception exc)
+            {
                 serviceResult.Exception = exc;
                 serviceResult.ServiceResultType = ServiceResultType.Fail;
                 _logger.Error($"Error occured in {MethodBase.GetCurrentMethod().Name} with exception message {exc.Message} and inner exception {exc.InnerException?.Message}");
@@ -215,7 +277,8 @@ namespace DMS.Business.Services {
             return serviceResult;
         }
 
-        public ServiceResult<UserDocumentDto> GetUserDocument(int documentId) {
+        public ServiceResult<UserDocumentDto> GetUserDocument(int documentId)
+        {
             var serviceResult = new ServiceResult<UserDocumentDto>();
             try {
                 var document = _model.UserDocuments.Find(documentId);
@@ -224,7 +287,9 @@ namespace DMS.Business.Services {
                 }
                 serviceResult.ServiceResultType = ServiceResultType.Success;
                 serviceResult.Data = _customMapperConfiguration.GetMapDto<UserDocumentDto, UserDocument>(document);
-            } catch (Exception exc) {
+            }
+            catch (Exception exc)
+            {
                 serviceResult.Exception = exc;
                 serviceResult.ServiceResultType = ServiceResultType.Fail;
                 _logger.Error($"Error occured in {MethodBase.GetCurrentMethod().Name} with exception message {exc.Message} and inner exception {exc.InnerException?.Message}");
@@ -232,7 +297,8 @@ namespace DMS.Business.Services {
             return serviceResult;
         }
 
-        public ServiceResult<UserDocumentDto> EditUserDocument(UserDocumentDto documentDto, int createdBy) {
+        public ServiceResult<UserDocumentDto> EditUserDocument(UserDocumentDto documentDto, int createdBy)
+        {
             var serviceResult = new ServiceResult<UserDocumentDto>();
             try {
                 var document = _model.UserDocuments.FirstOrDefault(f => f.Id == documentDto.Id);
@@ -252,7 +318,9 @@ namespace DMS.Business.Services {
                 }
                 serviceResult.ServiceResultType = ServiceResultType.Success;
                 serviceResult.Data = _customMapperConfiguration.GetMapDto<UserDocumentDto, UserDocument>(document);
-            } catch (Exception exc) {
+            }
+            catch (Exception exc)
+            {
                 serviceResult.Exception = exc;
                 serviceResult.ServiceResultType = ServiceResultType.Fail;
                 _logger.Error($"Error occured in {MethodBase.GetCurrentMethod().Name} with exception message {exc.Message} and inner exception {exc.InnerException?.Message}");
@@ -260,14 +328,17 @@ namespace DMS.Business.Services {
             return serviceResult;
         }
 
-        public ServiceResult<List<UserDocumentDto>> GetUserDocuments() {
+        public ServiceResult<List<UserDocumentDto>> GetUserDocuments()
+        {
             var serviceResult = new ServiceResult<List<UserDocumentDto>>();
             try {
                 var documents = _model.UserDocuments.ToList();
 
                 serviceResult.ServiceResultType = ServiceResultType.Success;
                 serviceResult.Data = documents.Select(s => _customMapperConfiguration.GetMapDto<UserDocumentDto, UserDocument>(s)).ToList();
-            } catch (Exception exc) {
+            }
+            catch (Exception exc)
+            {
                 serviceResult.Exception = exc;
                 serviceResult.ServiceResultType = ServiceResultType.Fail;
                 _logger.Error($"Error occured in {MethodBase.GetCurrentMethod().Name} with exception message {exc.Message} and inner exception {exc.InnerException?.Message}");
@@ -275,19 +346,24 @@ namespace DMS.Business.Services {
             return serviceResult;
         }
 
-        public ServiceResult<DocumentUploadResponseDto> AnalyzeDocument(string localFolder, string fileName) {
+        public ServiceResult<DocumentUploadResponseDto> AnalyzeDocument(string localFolder, string fileName)
+        {
             var result = new DocumentUploadResponseDto();
             var serviceResult = new ServiceResult<DocumentUploadResponseDto>();
-            try {
+            try
+            {
                 result.FilePath = fileName;
-                if (fileName.IsDocumentExtension()) {
+                if (fileName.IsDocumentExtension())
+                {
                     IDocumentParser parser = GetDocumentParser(localFolder);
                     var parsedDoc = parser.Parse();
                     var stringParser = new StringParser(parsedDoc.ToString());
                     result.PageCount = parsedDoc.TotalPageNumber;
                     result.CharCountWithSpaces = stringParser.GenerateCharacterCount();
                     result.CharCount = stringParser.GenerateCharacterCount(withoutWhitespaces: true);
-                } else {
+                }
+                else
+                {
                     ITextParser parser = GetTextParser(fileName);
                     var parsedDoc = parser.Parse();
                     var stringParser = new StringParser(parsedDoc);
@@ -298,7 +374,9 @@ namespace DMS.Business.Services {
 
                 serviceResult.ServiceResultType = ServiceResultType.Success;
                 serviceResult.Data = result;
-            } catch (Exception exc) {
+            }
+            catch (Exception exc)
+            {
                 serviceResult.Exception = exc;
                 serviceResult.ServiceResultType = ServiceResultType.Fail;
                 _logger.Error($"Error occured in {MethodBase.GetCurrentMethod().Name} with exception message {exc.Message} and inner exception {exc.InnerException?.Message}");
@@ -306,7 +384,8 @@ namespace DMS.Business.Services {
             return serviceResult;
         }
 
-        public ServiceResult<List<TranslationDocumentPartDto>> GetDocumentPartsNormalized(int translationDocumentId, int partCount, int createdBy) {
+        public ServiceResult<List<TranslationDocumentPartDto>> GetDocumentPartsNormalized(int translationDocumentId, int partCount, int createdBy)
+        {
             var serviceResult = new ServiceResult<List<TranslationDocumentPartDto>>();
             try {
                 var translationDocument = _model.TranslationDocuments.Find(translationDocumentId);
@@ -316,10 +395,13 @@ namespace DMS.Business.Services {
 
                 string content = string.Empty;
 
-                if (translationDocument.Path.IsDocumentExtension()) {
+                if (translationDocument.Path.IsDocumentExtension())
+                {
                     var parser = GetDocumentParser(translationDocument.Path);
                     content = parser.Parse().ToString();
-                } else {
+                }
+                else
+                {
                     var parser = GetTextParser(translationDocument.Path);
                     content = parser.Parse();
                 }
@@ -327,7 +409,8 @@ namespace DMS.Business.Services {
                 var stringParser = new StringParser(content);
                 var parts = stringParser.SplitByCount(partCount);
 
-                var documentParts = parts.Select(x => new TranslationDocumentPart() {
+                var documentParts = parts.Select(x => new TranslationDocumentPart()
+                {
                     TranslationDocumentId = translationDocumentId,
                     Path = translationDocument.Path,
                     Active = true,
@@ -346,9 +429,21 @@ namespace DMS.Business.Services {
                                                 .Where(x => x.TranslationDocumentId == translationDocumentId)
                                                 .ToList();
 
+                var documentAudit = new DocumentAudit
+                {
+                    Message = $"Document with id #{translationDocument.Id} and name {translationDocument.Name} partitioned as {documentPartsFromDb.Count} part to translatrors.",
+                    Status = "Document Partitioned",
+                    Date = DateTime.Now
+                };
+
+                var collection = _database.GetCollection<DocumentAudit>(ConfigurationManager.AppSettings["MongoAuditCollection"]);
+                collection.InsertOneAsync(documentAudit);
+
                 serviceResult.ServiceResultType = ServiceResultType.Success;
                 serviceResult.Data = documentPartsFromDb.Select(x => _customMapperConfiguration.GetMapDto<TranslationDocumentPartDto, TranslationDocumentPart>(x)).ToList();
-            } catch (Exception exc) {
+            }
+            catch (Exception exc)
+            {
                 serviceResult.Exception = exc;
                 serviceResult.ServiceResultType = ServiceResultType.Fail;
                 _logger.Error($"Error occured in {MethodBase.GetCurrentMethod().Name} with exception message {exc.Message} and inner exception {exc.InnerException?.Message}");
@@ -378,13 +473,17 @@ namespace DMS.Business.Services {
             throw new NotSupportedException("Bu doküman tipi desteklenmiyor.");
         }
 
-        private IDocumentParser GetDocumentParser(string filePath) {
+        private IDocumentParser GetDocumentParser(string filePath)
+        {
             var fileExtension = filePath.GetExtensionOfFile();
 
-            if (fileExtension == "pdf") {
+            if (fileExtension == "pdf")
+            {
                 return new PDFDocumentParser(new ParserContext(filePath));
-            } else if (fileExtension == "doc"
-                       || fileExtension == "docx") {
+            }
+            else if (fileExtension == "doc"
+                     || fileExtension == "docx")
+            {
                 return new Word2007DocumentParser(new ParserContext(filePath));
             }
 

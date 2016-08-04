@@ -1,25 +1,17 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Configuration;
-using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 using Autofac;
 using Autofac.Integration.WebApi;
-using DMS.Business;
 using DMS.Business.ExternalServices;
 using DMS.Business.Services;
 using log4net;
-using MassTransit;
 using Microsoft.Owin.Hosting;
 using RabbitMQ.Client;
 using Tangent.CeviriDukkani.Data.Model;
 using Tangent.CeviriDukkani.Domain.Mappers;
-using Tangent.CeviriDukkani.Event.DocumentEvents;
 using Tangent.CeviriDukkani.Logging;
 using Tangent.CeviriDukkani.Messaging;
-using Tangent.CeviriDukkani.Messaging.Consumer;
 using Tangent.CeviriDukkani.Messaging.Producer;
 
 namespace DMS.Api {
