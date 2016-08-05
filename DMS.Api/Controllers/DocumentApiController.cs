@@ -165,7 +165,7 @@ namespace DMS.Api.Controllers {
             return OK(serviceResult);
         }
 
-        [HttpPost, Route("getDocumentPartsNormalized")]
+        [HttpGet, Route("getDocumentPartsNormalized")]
         public HttpResponseMessage GetDocumentPartsNormalized(int translationDocumentId, int partCount) {
             var serviceResult = _documentService.GetDocumentPartsNormalized(translationDocumentId, partCount, SessionUser.User.Id);
 
@@ -178,6 +178,17 @@ namespace DMS.Api.Controllers {
         [HttpGet, Route("getTranslationDocumentPartById")]
         public HttpResponseMessage GetTranslationDocumentPartById([FromUri]int translationDocumentPartId) {
             var serviceResult = _documentService.GetTranslationDocumentPartById(translationDocumentPartId);
+
+            if (serviceResult.ServiceResultType != ServiceResultType.Success)
+                return Error();
+
+            return OK(serviceResult);
+        }
+
+        [HttpGet, Route("analyzeDocument")]
+        public HttpResponseMessage AnalyzeDocument([FromUri]string localFolder, [FromUri]string fileName)
+        {
+            var serviceResult = _documentService.AnalyzeDocument(localFolder, fileName);
 
             if (serviceResult.ServiceResultType != ServiceResultType.Success)
                 return Error();
