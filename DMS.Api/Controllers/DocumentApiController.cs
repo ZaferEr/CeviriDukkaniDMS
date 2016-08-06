@@ -199,9 +199,9 @@ namespace DMS.Api.Controllers {
         }
 
         [HttpGet, Route("getDocumentAudits")]
-        public HttpResponseMessage GetDocumentAudits()
+        public HttpResponseMessage GetDocumentAudits(int documentId)
         {
-            var serviceResult = _documentService.GetDocumentAudits();
+            var serviceResult = _documentService.GetDocumentAudits(documentId);
 
             if (serviceResult.ServiceResultType != ServiceResultType.Success)
                 return Error();
