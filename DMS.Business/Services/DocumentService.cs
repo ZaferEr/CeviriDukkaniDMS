@@ -494,13 +494,13 @@ namespace DMS.Business.Services
             return serviceResult;
         }
 
-        public ServiceResult<List<DocumentAuditDto>> GetDocumentAudits()
+        public ServiceResult<List<DocumentAuditDto>> GetDocumentAudits(int documentId)
         {
             var serviceResult = new ServiceResult<List<DocumentAuditDto>>();
             try
             {
                 var documentAuditCollection = _database.GetCollection<DocumentAudit>(ConfigurationManager.AppSettings["MongoAuditCollection"]);
-                var documents = documentAuditCollection.FindAsync(null)
+                var documents = documentAuditCollection.FindAsync(audit => audit.DocumentId == documentId)
                     .Result
                     .ToList()
                     .Select(x => new DocumentAuditDto()
