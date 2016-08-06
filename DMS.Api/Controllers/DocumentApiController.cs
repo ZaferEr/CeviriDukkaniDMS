@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Configuration;
+using System.IO;
 using System.Net;
 using System.Net.Http;
 using System.Web;
@@ -24,8 +25,23 @@ namespace DMS.Api.Controllers {
         [HttpPost, Route("uploadDocument")]
         public HttpResponseMessage UploadDocument(HttpRequestMessage request) {
             try {
+                var requestFromBase = Request;
 
-                //var postedFile = request.Files[0];
+                var multipartStream = requestFromBase.Content.ReadAsMultipartAsync().Result;
+                foreach (var file in multipartStream.Contents) {
+                    var filename = file.Headers.ContentDisposition.FileName.Trim('\"');
+                    var buffer = file.ReadAsByteArrayAsync().Result;
+
+                    File.WriteAllBytes("base.jpg",buffer);
+                    //Do whatever you want with filename and its binaray data.
+                }
+
+
+                //var httpRequest = HttpContext.Current.Request;
+                //if (httpRequest.Files.Count != 1)
+                //    throw new HttpResponseException(HttpStatusCode.UnsupportedMediaType);
+
+                //var postedFile = httpRequest.Files[0];
                 //var fileExtension = postedFile.FileName.GetExtensionOfFile();
                 //var newGuid = Guid.NewGuid();
                 //var filePath = ConfigurationManager.AppSettings["UploadDocumentPath"] + newGuid + "." + fileExtension;
