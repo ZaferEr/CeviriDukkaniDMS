@@ -24,22 +24,19 @@ namespace DMS.Api.Controllers {
         [HttpPost, Route("uploadDocument")]
         public HttpResponseMessage UploadDocument(HttpRequestMessage request) {
             try {
-                var httpRequest = HttpContext.Current.Request;
-                if (httpRequest.Files.Count != 1)
-                    throw new HttpResponseException(HttpStatusCode.UnsupportedMediaType);
 
-                var postedFile = httpRequest.Files[0];
-                var fileExtension = postedFile.FileName.GetExtensionOfFile();
-                var newGuid = Guid.NewGuid();
-                var filePath = ConfigurationManager.AppSettings["UploadDocumentPath"] + newGuid + "." + fileExtension;
-                var localPath = HttpContext.Current.Server.MapPath(filePath);
-                postedFile.SaveAs(localPath);
-                // NOTE: To store in memory use postedFile.InputStream
+                //var postedFile = request.Files[0];
+                //var fileExtension = postedFile.FileName.GetExtensionOfFile();
+                //var newGuid = Guid.NewGuid();
+                //var filePath = ConfigurationManager.AppSettings["UploadDocumentPath"] + newGuid + "." + fileExtension;
+                //var localPath = HttpContext.Current.Server.MapPath(filePath);
+                //postedFile.SaveAs(localPath);
+                //// NOTE: To store in memory use postedFile.InputStream
 
-                ServiceResult<DocumentUploadResponseDto> uploadResponseDto = _documentService.AnalyzeDocument(localPath, filePath);
+                //ServiceResult<DocumentUploadResponseDto> uploadResponseDto = _documentService.AnalyzeDocument(localPath, filePath);
 
-                // Send OK Response along with saved file names to the client.
-                return Request.CreateResponse(HttpStatusCode.OK, uploadResponseDto);
+                //// Send OK Response along with saved file names to the client.
+                return Request.CreateResponse(HttpStatusCode.OK);
             } catch (System.Exception e) {
                 return Request.CreateErrorResponse(HttpStatusCode.InternalServerError, e);
             }
@@ -186,9 +183,9 @@ namespace DMS.Api.Controllers {
         }
 
         [HttpGet, Route("getDocumentAudits")]
-        public HttpResponseMessage GetDocumentAudits()
+        public HttpResponseMessage GetDocumentAudits(int documentId)
         {
-            var serviceResult = _documentService.GetDocumentAudits();
+            var serviceResult = _documentService.GetDocumentAudits(documentId);
 
             if (serviceResult.ServiceResultType != ServiceResultType.Success)
                 return Error();
