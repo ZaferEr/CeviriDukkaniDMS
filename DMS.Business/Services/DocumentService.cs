@@ -8,6 +8,7 @@ using log4net;
 using MongoDB.Driver;
 using Tangent.CeviriDukkani.Data.Model;
 using Tangent.CeviriDukkani.Domain.Common;
+using Tangent.CeviriDukkani.Domain.Dto.Audit;
 using Tangent.CeviriDukkani.Domain.Dto.Document;
 using Tangent.CeviriDukkani.Domain.Dto.Response;
 using Tangent.CeviriDukkani.Domain.Entities.Audit;
@@ -29,12 +30,13 @@ namespace DMS.Business.Services
         protected static IMongoClient _client;
         protected static IMongoDatabase _database;
 
-        public DocumentService(CeviriDukkaniModel model, CustomMapperConfiguration customMapperConfiguration,ILog logger) {
+        public DocumentService(CeviriDukkaniModel model, CustomMapperConfiguration customMapperConfiguration, ILog logger)
+        {
             _model = model;
             _customMapperConfiguration = customMapperConfiguration;
 
-            _client = new MongoClient(ConfigurationManager.AppSettings["MongoAuditStore"]); 
-             _database = _client.GetDatabase(ConfigurationManager.AppSettings["MongoAuditDatabase"]);
+            _client = new MongoClient(ConfigurationManager.AppSettings["MongoAuditStore"]);
+            _database = _client.GetDatabase(ConfigurationManager.AppSettings["MongoAuditDatabase"]);
             _logger = logger;
         }
 
@@ -48,19 +50,19 @@ namespace DMS.Business.Services
                 var document = _customMapperConfiguration.GetMapEntity<TranslationDocument, TranslationDocumentDto>(documentDto);
 
                 _model.TranslationDocuments.Add(document);
-                if (_model.SaveChanges() <= 0) {
+                if (_model.SaveChanges() <= 0)
+                {
                     throw new BusinessException(ExceptionCodes.UnableToInsert);
                 }
-
                 var documentAudit = new DocumentAudit
                 {
+                    DocumentId = document.Id,
                     Message = $"Document with id #{document.Id} and name {document.Name} added for translation.",
                     Status = "Document Added",
                     Date = DateTime.Now
                 };
 
-                var collection = _database.GetCollection<DocumentAudit>(ConfigurationManager.AppSettings["MongoAuditCollection"]);
-                collection.InsertOneAsync(documentAudit);
+                AddDocumentAudit(documentAudit);
 
                 serviceResult.ServiceResultType = ServiceResultType.Success;
                 serviceResult.Data = _customMapperConfiguration.GetMapDto<TranslationDocumentDto, TranslationDocument>(document);
@@ -77,9 +79,11 @@ namespace DMS.Business.Services
         public ServiceResult<TranslationDocumentDto> GetTranslationDocument(int documentId)
         {
             var serviceResult = new ServiceResult<TranslationDocumentDto>();
-            try {
+            try
+            {
                 var document = _model.TranslationDocuments.Find(documentId);
-                if (document == null) {
+                if (document == null)
+                {
                     throw new DbOperationException(ExceptionCodes.NoRelatedData);
                 }
                 serviceResult.ServiceResultType = ServiceResultType.Success;
@@ -97,9 +101,11 @@ namespace DMS.Business.Services
         public ServiceResult<TranslationDocumentDto> EditTranslationDocument(TranslationDocumentDto documentDto, int createdBy)
         {
             var serviceResult = new ServiceResult<TranslationDocumentDto>();
-            try {
+            try
+            {
                 var document = _model.TranslationDocuments.FirstOrDefault(f => f.Id == documentDto.Id);
-                if (document == null) {
+                if (document == null)
+                {
                     throw new DbOperationException(ExceptionCodes.NoRelatedData);
                 }
 
@@ -114,19 +120,20 @@ namespace DMS.Business.Services
                 document.UpdatedAt = DateTime.Now;
                 document.UpdatedBy = createdBy;
 
-                if (_model.SaveChanges() <= 0) {
+                if (_model.SaveChanges() <= 0)
+                {
                     throw new BusinessException(ExceptionCodes.UnableToUpdate);
                 }
 
                 var documentAudit = new DocumentAudit
                 {
+                    DocumentId = document.Id,
                     Message = $"Document with id #{document.Id} and name {document.Name} updated.",
                     Status = "Document Updated",
                     Date = DateTime.Now
                 };
 
-                var collection = _database.GetCollection<DocumentAudit>(ConfigurationManager.AppSettings["MongoAuditCollection"]);
-                collection.InsertOneAsync(documentAudit);
+                AddDocumentAudit(documentAudit);
 
                 serviceResult.ServiceResultType = ServiceResultType.Success;
                 serviceResult.Data = _customMapperConfiguration.GetMapDto<TranslationDocumentDto, TranslationDocument>(document);
@@ -143,7 +150,8 @@ namespace DMS.Business.Services
         public ServiceResult<List<TranslationDocumentDto>> GetTranslationDocuments()
         {
             var serviceResult = new ServiceResult<List<TranslationDocumentDto>>();
-            try {
+            try
+            {
                 var documents = _model.TranslationDocuments.ToList();
 
                 serviceResult.ServiceResultType = ServiceResultType.Success;
@@ -168,7 +176,8 @@ namespace DMS.Business.Services
                 var document = _customMapperConfiguration.GetMapEntity<GeneralDocument, GeneralDocumentDto>(documentDto);
 
                 _model.GeneralDocuments.Add(document);
-                if (_model.SaveChanges() <= 0) {
+                if (_model.SaveChanges() <= 0)
+                {
                     throw new BusinessException(ExceptionCodes.UnableToInsert);
                 }
                 serviceResult.ServiceResultType = ServiceResultType.Success;
@@ -186,9 +195,11 @@ namespace DMS.Business.Services
         public ServiceResult<GeneralDocumentDto> GetGeneralDocument(int documentId)
         {
             var serviceResult = new ServiceResult<GeneralDocumentDto>();
-            try {
+            try
+            {
                 var document = _model.GeneralDocuments.Find(documentId);
-                if (document == null) {
+                if (document == null)
+                {
                     throw new DbOperationException(ExceptionCodes.NoRelatedData);
                 }
                 serviceResult.ServiceResultType = ServiceResultType.Success;
@@ -206,9 +217,11 @@ namespace DMS.Business.Services
         public ServiceResult<GeneralDocumentDto> EditGeneralDocument(GeneralDocumentDto documentDto, int createdBy)
         {
             var serviceResult = new ServiceResult<GeneralDocumentDto>();
-            try {
+            try
+            {
                 var document = _model.GeneralDocuments.FirstOrDefault(f => f.Id == documentDto.Id);
-                if (document == null) {
+                if (document == null)
+                {
                     throw new DbOperationException(ExceptionCodes.NoRelatedData);
                 }
 
@@ -219,7 +232,8 @@ namespace DMS.Business.Services
                 document.UpdatedAt = DateTime.Now;
                 document.UpdatedBy = createdBy;
 
-                if (_model.SaveChanges() <= 0) {
+                if (_model.SaveChanges() <= 0)
+                {
                     throw new BusinessException(ExceptionCodes.UnableToUpdate);
                 }
                 serviceResult.ServiceResultType = ServiceResultType.Success;
@@ -237,7 +251,8 @@ namespace DMS.Business.Services
         public ServiceResult<List<GeneralDocumentDto>> GetGeneralDocuments()
         {
             var serviceResult = new ServiceResult<List<GeneralDocumentDto>>();
-            try {
+            try
+            {
                 var documents = _model.GeneralDocuments.ToList();
 
                 serviceResult.ServiceResultType = ServiceResultType.Success;
@@ -262,7 +277,8 @@ namespace DMS.Business.Services
                 var document = _customMapperConfiguration.GetMapEntity<UserDocument, UserDocumentDto>(documentDto);
 
                 _model.UserDocuments.Add(document);
-                if (_model.SaveChanges() <= 0) {
+                if (_model.SaveChanges() <= 0)
+                {
                     throw new BusinessException(ExceptionCodes.UnableToInsert);
                 }
                 serviceResult.ServiceResultType = ServiceResultType.Success;
@@ -280,9 +296,11 @@ namespace DMS.Business.Services
         public ServiceResult<UserDocumentDto> GetUserDocument(int documentId)
         {
             var serviceResult = new ServiceResult<UserDocumentDto>();
-            try {
+            try
+            {
                 var document = _model.UserDocuments.Find(documentId);
-                if (document == null) {
+                if (document == null)
+                {
                     throw new DbOperationException(ExceptionCodes.NoRelatedData);
                 }
                 serviceResult.ServiceResultType = ServiceResultType.Success;
@@ -300,9 +318,11 @@ namespace DMS.Business.Services
         public ServiceResult<UserDocumentDto> EditUserDocument(UserDocumentDto documentDto, int createdBy)
         {
             var serviceResult = new ServiceResult<UserDocumentDto>();
-            try {
+            try
+            {
                 var document = _model.UserDocuments.FirstOrDefault(f => f.Id == documentDto.Id);
-                if (document == null) {
+                if (document == null)
+                {
                     throw new DbOperationException(ExceptionCodes.NoRelatedData);
                 }
 
@@ -313,7 +333,8 @@ namespace DMS.Business.Services
                 document.UpdatedAt = DateTime.Now;
                 document.UpdatedBy = createdBy;
 
-                if (_model.SaveChanges() <= 0) {
+                if (_model.SaveChanges() <= 0)
+                {
                     throw new BusinessException(ExceptionCodes.UnableToUpdate);
                 }
                 serviceResult.ServiceResultType = ServiceResultType.Success;
@@ -331,7 +352,8 @@ namespace DMS.Business.Services
         public ServiceResult<List<UserDocumentDto>> GetUserDocuments()
         {
             var serviceResult = new ServiceResult<List<UserDocumentDto>>();
-            try {
+            try
+            {
                 var documents = _model.UserDocuments.ToList();
 
                 serviceResult.ServiceResultType = ServiceResultType.Success;
@@ -387,9 +409,11 @@ namespace DMS.Business.Services
         public ServiceResult<List<TranslationDocumentPartDto>> GetDocumentPartsNormalized(int translationDocumentId, int partCount, int createdBy)
         {
             var serviceResult = new ServiceResult<List<TranslationDocumentPartDto>>();
-            try {
+            try
+            {
                 var translationDocument = _model.TranslationDocuments.Find(translationDocumentId);
-                if (translationDocument == null) {
+                if (translationDocument == null)
+                {
                     throw new BusinessException(ExceptionCodes.NoRelatedData);
                 }
 
@@ -431,13 +455,13 @@ namespace DMS.Business.Services
 
                 var documentAudit = new DocumentAudit
                 {
+                    DocumentId = translationDocument.Id,
                     Message = $"Document with id #{translationDocument.Id} and name {translationDocument.Name} partitioned as {documentPartsFromDb.Count} part to translatrors.",
                     Status = "Document Partitioned",
                     Date = DateTime.Now
                 };
 
-                var collection = _database.GetCollection<DocumentAudit>(ConfigurationManager.AppSettings["MongoAuditCollection"]);
-                collection.InsertOneAsync(documentAudit);
+                AddDocumentAudit(documentAudit);
 
                 serviceResult.ServiceResultType = ServiceResultType.Success;
                 serviceResult.Data = documentPartsFromDb.Select(x => _customMapperConfiguration.GetMapDto<TranslationDocumentPartDto, TranslationDocumentPart>(x)).ToList();
@@ -451,14 +475,18 @@ namespace DMS.Business.Services
             return serviceResult;
         }
 
-        public ServiceResult<TranslationDocumentPartDto> GetTranslationDocumentPartById(int translationDocumentPartId) {
+        public ServiceResult<TranslationDocumentPartDto> GetTranslationDocumentPartById(int translationDocumentPartId)
+        {
             var serviceResult = new ServiceResult<TranslationDocumentPartDto>();
-            try {
+            try
+            {
                 var translationDocumentPart = _model.TranslationDocumentParts.Find(translationDocumentPartId);
 
                 serviceResult.ServiceResultType = ServiceResultType.Success;
-                serviceResult.Data = _customMapperConfiguration.GetMapDto<TranslationDocumentPartDto,TranslationDocumentPart>(translationDocumentPart);
-            } catch (Exception exc) {
+                serviceResult.Data = _customMapperConfiguration.GetMapDto<TranslationDocumentPartDto, TranslationDocumentPart>(translationDocumentPart);
+            }
+            catch (Exception exc)
+            {
                 serviceResult.Exception = exc;
                 serviceResult.ServiceResultType = ServiceResultType.Fail;
                 _logger.Error($"Error occured in {MethodBase.GetCurrentMethod().Name} with exception message {exc.Message} and inner exception {exc.InnerException?.Message}");
@@ -466,8 +494,47 @@ namespace DMS.Business.Services
             return serviceResult;
         }
 
-        private ITextParser GetTextParser(string filePath) {
-            if (filePath.GetExtensionOfFile() == "txt") {
+        public ServiceResult<List<DocumentAuditDto>> GetDocumentAudits(int documentId)
+        {
+            var serviceResult = new ServiceResult<List<DocumentAuditDto>>();
+            try
+            {
+                var documentAuditCollection = _database.GetCollection<DocumentAudit>(ConfigurationManager.AppSettings["MongoAuditCollection"]);
+                var documents = documentAuditCollection.FindAsync(audit => audit.DocumentId == documentId)
+                    .Result
+                    .ToList()
+                    .Select(x => new DocumentAuditDto()
+                    {
+                        Id = x.Id,
+                        DocumentId = x.DocumentId,
+                        Date = x.Date,
+                        Message = x.Message,
+                        Status = x.Status
+                    })
+                    .ToList();
+
+                serviceResult.ServiceResultType = ServiceResultType.Success;
+                serviceResult.Data = documents;
+            }
+            catch (Exception exc)
+            {
+                serviceResult.Exception = exc;
+                serviceResult.ServiceResultType = ServiceResultType.Fail;
+                _logger.Error($"Error occured in {MethodBase.GetCurrentMethod().Name} with exception message {exc.Message} and inner exception {exc.InnerException?.Message}");
+            }
+            return serviceResult;
+        }
+
+        private void AddDocumentAudit(DocumentAudit documentAudit)
+        {
+            var collection = _database.GetCollection<DocumentAudit>(ConfigurationManager.AppSettings["MongoAuditCollection"]);
+            collection.InsertOneAsync(documentAudit);
+        }
+
+        private ITextParser GetTextParser(string filePath)
+        {
+            if (filePath.GetExtensionOfFile() == "txt")
+            {
                 return new PlainTextParser(new ParserContext(filePath));
             }
             throw new NotSupportedException("Bu doküman tipi desteklenmiyor.");

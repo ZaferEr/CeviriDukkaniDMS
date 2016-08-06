@@ -198,6 +198,17 @@ namespace DMS.Api.Controllers {
             return OK(serviceResult);
         }
 
+        [HttpGet, Route("getDocumentAudits")]
+        public HttpResponseMessage GetDocumentAudits()
+        {
+            var serviceResult = _documentService.GetDocumentAudits();
+
+            if (serviceResult.ServiceResultType != ServiceResultType.Success)
+                return Error();
+
+            return OK(serviceResult);
+        }
+
         [HttpGet, Route("analyzeDocument")]
         public HttpResponseMessage AnalyzeDocument([FromUri]string localFolder, [FromUri]string fileName)
         {
