@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Configuration;
+using System.IO;
 using System.Net;
 using System.Net.Http;
 using System.Web;
@@ -24,22 +25,34 @@ namespace DMS.Api.Controllers {
         [HttpPost, Route("uploadDocument")]
         public HttpResponseMessage UploadDocument(HttpRequestMessage request) {
             try {
-                var httpRequest = HttpContext.Current.Request;
-                if (httpRequest.Files.Count != 1)
-                    throw new HttpResponseException(HttpStatusCode.UnsupportedMediaType);
+                var requestFromBase = Request;
 
-                var postedFile = httpRequest.Files[0];
-                var fileExtension = postedFile.FileName.GetExtensionOfFile();
-                var newGuid = Guid.NewGuid();
-                var filePath = ConfigurationManager.AppSettings["UploadDocumentPath"] + newGuid + "." + fileExtension;
-                var localPath = HttpContext.Current.Server.MapPath(filePath);
-                postedFile.SaveAs(localPath);
-                // NOTE: To store in memory use postedFile.InputStream
+                var multipartStream = requestFromBase.Content.ReadAsMultipartAsync().Result;
+                foreach (var file in multipartStream.Contents) {
+                    var filename = file.Headers.ContentDisposition.FileName.Trim('\"');
+                    var buffer = file.ReadAsByteArrayAsync().Result;
 
-                ServiceResult<DocumentUploadResponseDto> uploadResponseDto = _documentService.AnalyzeDocument(localPath, filePath);
+                    File.WriteAllBytes("base.jpg",buffer);
+                    //Do whatever you want with filename and its binaray data.
+                }
 
-                // Send OK Response along with saved file names to the client.
-                return Request.CreateResponse(HttpStatusCode.OK, uploadResponseDto);
+
+                //var httpRequest = HttpContext.Current.Request;
+                //if (httpRequest.Files.Count != 1)
+                //    throw new HttpResponseException(HttpStatusCode.UnsupportedMediaType);
+
+                //var postedFile = httpRequest.Files[0];
+                //var fileExtension = postedFile.FileName.GetExtensionOfFile();
+                //var newGuid = Guid.NewGuid();
+                //var filePath = ConfigurationManager.AppSettings["UploadDocumentPath"] + newGuid + "." + fileExtension;
+                //var localPath = HttpContext.Current.Server.MapPath(filePath);
+                //postedFile.SaveAs(localPath);
+                //// NOTE: To store in memory use postedFile.InputStream
+
+                //ServiceResult<DocumentUploadResponseDto> uploadResponseDto = _documentService.AnalyzeDocument(localPath, filePath);
+
+                //// Send OK Response along with saved file names to the client.
+                return Request.CreateResponse(HttpStatusCode.OK);
             } catch (System.Exception e) {
                 return Request.CreateErrorResponse(HttpStatusCode.InternalServerError, e);
             }

@@ -62,9 +62,7 @@ namespace DMS.Api {
                     Console.WriteLine("Error Occured");
                     _logger.Error($"Unable to save translation operations");
                 } else {
-                    var operations =
-                        JsonConvert.DeserializeObject<List<TranslationOperationDto>>(
-                            translationOperationSaveResult.Data.ToString());
+                    var operations = translationOperationSaveResult.Data;
 
                     var createOrderDetails = new CreateOrderDetailEvent {
                         Id = Guid.NewGuid(),

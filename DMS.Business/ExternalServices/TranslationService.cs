@@ -20,9 +20,9 @@ namespace DMS.Business.ExternalServices {
         }
         #region Implementation of ITranslationService
 
-        public ServiceResult SaveTranslationOperations(List<TranslationOperationDto> translationOperations) {
+        public ServiceResult<List<TranslationOperationDto>> SaveTranslationOperations(List<TranslationOperationDto> translationOperations) {
             var response = _httpClient.PostAsJsonAsync($"api/translationapi/saveTranslationOperations",translationOperations).Result;
-            return response.Content.ReadAsAsync<ServiceResult>().Result;
+            return response.Content.ReadAsAsync<ServiceResult<List<TranslationOperationDto>>>().Result;
         }
 
         #endregion
