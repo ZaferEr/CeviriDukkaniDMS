@@ -13,33 +13,48 @@ using Tangent.CeviriDukkani.Domain.Dto.Document;
 using Tangent.CeviriDukkani.Domain.Dto.Response;
 using Tangent.CeviriDukkani.WebCore.BaseControllers;
 
-namespace DMS.Api.Controllers {
+namespace DMS.Api.Controllers
+{
     [RoutePrefix("api/documentapi")]
-    public class DocumentApiController : BaseApiController {
+    public class DocumentApiController : BaseApiController
+    {
         private readonly IDocumentService _documentService;
 
-        public DocumentApiController(IDocumentService documentService) {
+        public DocumentApiController(IDocumentService documentService)
+        {
             _documentService = documentService;
         }
 
         [HttpPost, Route("uploadDocument")]
-        public HttpResponseMessage UploadDocument(HttpRequestMessage request) {
-            try {
+        public HttpResponseMessage UploadDocument(HttpRequestMessage request)
+        {
+            try
+            {
                 var requestFromBase = Request;
 
                 var multipartStream = requestFromBase.Content.ReadAsMultipartAsync().Result;
-                foreach (var file in multipartStream.Contents) {
+                foreach (var file in multipartStream.Contents)
+                {
                     var filename = file.Headers.ContentDisposition.FileName.Trim('\"');
                     var buffer = file.ReadAsByteArrayAsync().Result;
+                    var uploadPath = ConfigurationManager.AppSettings["UploadDocumentPath"];
 
-                    File.WriteAllBytes("base.jpg",buffer);
-                    //Do whatever you want with filename and its binaray data.
+                    var fileExtension = file.Headers.ContentDisposition.FileName.GetExtensionOfFile().Replace("\"", string.Empty);
+                    var newGuid = Guid.NewGuid();
+                    var uploadFolder = $"{AppDomain.CurrentDomain.BaseDirectory}/{uploadPath}";
+
+                    bool exists = Directory.Exists(uploadFolder);
+
+                    if (!exists)
+                        Directory.CreateDirectory(uploadFolder);
+
+                    var filePath = $"{AppDomain.CurrentDomain.BaseDirectory}/{uploadPath}/{newGuid}.{fileExtension}";
+                    File.WriteAllBytes(filePath, buffer);
+
+                    ServiceResult<DocumentUploadResponseDto> uploadResponseDto = _documentService.AnalyzeDocument(filePath, $"/{uploadPath}/{newGuid}.{fileExtension}");
+
+                    return Request.CreateResponse(HttpStatusCode.OK, uploadResponseDto);
                 }
-
-
-                //var httpRequest = HttpContext.Current.Request;
-                //if (httpRequest.Files.Count != 1)
-                //    throw new HttpResponseException(HttpStatusCode.UnsupportedMediaType);
 
                 //var postedFile = httpRequest.Files[0];
                 //var fileExtension = postedFile.FileName.GetExtensionOfFile();
@@ -52,14 +67,17 @@ namespace DMS.Api.Controllers {
                 //ServiceResult<DocumentUploadResponseDto> uploadResponseDto = _documentService.AnalyzeDocument(localPath, filePath);
 
                 //// Send OK Response along with saved file names to the client.
-                return Request.CreateResponse(HttpStatusCode.OK);
-            } catch (System.Exception e) {
+                return Request.CreateResponse(HttpStatusCode.InternalServerError);
+            }
+            catch (System.Exception e)
+            {
                 return Request.CreateErrorResponse(HttpStatusCode.InternalServerError, e);
             }
         }
 
         [HttpPost, Route("addTranslationDocument")]
-        public HttpResponseMessage AddTranslationDocument(TranslationDocumentDto documentDto) {
+        public HttpResponseMessage AddTranslationDocument(TranslationDocumentDto documentDto)
+        {
             var serviceResult = _documentService.AddTranslationDocument(documentDto, 1);
 
             if (serviceResult.ServiceResultType != ServiceResultType.Success)
@@ -69,7 +87,8 @@ namespace DMS.Api.Controllers {
         }
 
         [HttpPost, Route("editTranslationDocument")]
-        public HttpResponseMessage EditTranslationDocument(TranslationDocumentDto documentDto) {
+        public HttpResponseMessage EditTranslationDocument(TranslationDocumentDto documentDto)
+        {
             var serviceResult = _documentService.EditTranslationDocument(documentDto, SessionUser.User.Id);
 
             if (serviceResult.ServiceResultType != ServiceResultType.Success)
@@ -79,7 +98,8 @@ namespace DMS.Api.Controllers {
         }
 
         [HttpGet, Route("getTranslationDocuments")]
-        public HttpResponseMessage GetTranslationDocuments() {
+        public HttpResponseMessage GetTranslationDocuments()
+        {
             var serviceResult = _documentService.GetTranslationDocuments();
 
             if (serviceResult.ServiceResultType != ServiceResultType.Success)
@@ -89,7 +109,8 @@ namespace DMS.Api.Controllers {
         }
 
         [HttpGet, Route("getTranslationDocument/{id}")]
-        public HttpResponseMessage GetTranslationDocument(int id) {
+        public HttpResponseMessage GetTranslationDocument(int id)
+        {
             var serviceResult = _documentService.GetTranslationDocument(id);
 
             if (serviceResult.ServiceResultType != ServiceResultType.Success)
@@ -99,7 +120,8 @@ namespace DMS.Api.Controllers {
         }
 
         [HttpPost, Route("addGeneralDocument")]
-        public HttpResponseMessage AddGeneralDocument(GeneralDocumentDto documentDto) {
+        public HttpResponseMessage AddGeneralDocument(GeneralDocumentDto documentDto)
+        {
             var serviceResult = _documentService.AddGeneralDocument(documentDto, SessionUser.User.Id);
 
             if (serviceResult.ServiceResultType != ServiceResultType.Success)
@@ -109,7 +131,8 @@ namespace DMS.Api.Controllers {
         }
 
         [HttpPost, Route("editGeneralDocument")]
-        public HttpResponseMessage EditGeneralDocument(GeneralDocumentDto documentDto) {
+        public HttpResponseMessage EditGeneralDocument(GeneralDocumentDto documentDto)
+        {
             var serviceResult = _documentService.EditGeneralDocument(documentDto, SessionUser.User.Id);
 
             if (serviceResult.ServiceResultType != ServiceResultType.Success)
@@ -119,7 +142,8 @@ namespace DMS.Api.Controllers {
         }
 
         [HttpGet, Route("getGeneralDocuments")]
-        public HttpResponseMessage GetGeneralDocuments() {
+        public HttpResponseMessage GetGeneralDocuments()
+        {
             var serviceResult = _documentService.GetGeneralDocuments();
 
             if (serviceResult.ServiceResultType != ServiceResultType.Success)
@@ -129,7 +153,8 @@ namespace DMS.Api.Controllers {
         }
 
         [HttpGet, Route("getGeneralDocument/{id}")]
-        public HttpResponseMessage GetGeneralDocument(int id) {
+        public HttpResponseMessage GetGeneralDocument(int id)
+        {
             var serviceResult = _documentService.GetGeneralDocument(id);
 
             if (serviceResult.ServiceResultType != ServiceResultType.Success)
@@ -139,7 +164,8 @@ namespace DMS.Api.Controllers {
         }
 
         [HttpPost, Route("addUserDocument")]
-        public HttpResponseMessage AddUserDocument(UserDocumentDto documentDto) {
+        public HttpResponseMessage AddUserDocument(UserDocumentDto documentDto)
+        {
             var serviceResult = _documentService.AddUserDocument(documentDto, SessionUser.User.Id);
 
             if (serviceResult.ServiceResultType != ServiceResultType.Success)
@@ -149,7 +175,8 @@ namespace DMS.Api.Controllers {
         }
 
         [HttpPost, Route("editUserDocument")]
-        public HttpResponseMessage EditUserDocument(UserDocumentDto documentDto) {
+        public HttpResponseMessage EditUserDocument(UserDocumentDto documentDto)
+        {
             var serviceResult = _documentService.EditUserDocument(documentDto, SessionUser.User.Id);
 
             if (serviceResult.ServiceResultType != ServiceResultType.Success)
@@ -159,7 +186,8 @@ namespace DMS.Api.Controllers {
         }
 
         [HttpGet, Route("getUserDocuments")]
-        public HttpResponseMessage GetUserDocuments() {
+        public HttpResponseMessage GetUserDocuments()
+        {
             var serviceResult = _documentService.GetUserDocuments();
 
             if (serviceResult.ServiceResultType != ServiceResultType.Success)
@@ -169,7 +197,8 @@ namespace DMS.Api.Controllers {
         }
 
         [HttpGet, Route("getUserDocument/{id}")]
-        public HttpResponseMessage GetUserDocument(int id) {
+        public HttpResponseMessage GetUserDocument(int id)
+        {
             var serviceResult = _documentService.GetUserDocument(id);
 
             if (serviceResult.ServiceResultType != ServiceResultType.Success)
@@ -179,7 +208,8 @@ namespace DMS.Api.Controllers {
         }
 
         [HttpGet, Route("getDocumentPartsNormalized")]
-        public HttpResponseMessage GetDocumentPartsNormalized(int translationDocumentId, int partCount) {
+        public HttpResponseMessage GetDocumentPartsNormalized(int translationDocumentId, int partCount)
+        {
             var serviceResult = _documentService.GetDocumentPartsNormalized(translationDocumentId, partCount, SessionUser.User.Id);
 
             if (serviceResult.ServiceResultType != ServiceResultType.Success)
@@ -189,7 +219,8 @@ namespace DMS.Api.Controllers {
         }
 
         [HttpGet, Route("getTranslationDocumentPartById")]
-        public HttpResponseMessage GetTranslationDocumentPartById([FromUri]int translationDocumentPartId) {
+        public HttpResponseMessage GetTranslationDocumentPartById([FromUri]int translationDocumentPartId)
+        {
             var serviceResult = _documentService.GetTranslationDocumentPartById(translationDocumentPartId);
 
             if (serviceResult.ServiceResultType != ServiceResultType.Success)

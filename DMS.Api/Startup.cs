@@ -1,4 +1,5 @@
 ﻿using System.Web.Http;
+using System.Web.Http.Cors;
 using Autofac.Integration.WebApi;
 using Owin;
 
@@ -11,8 +12,9 @@ namespace DMS.Api {
             HttpConfiguration config = new HttpConfiguration();
             config.MapHttpAttributeRoutes();
 
-
-
+            var cors = new EnableCorsAttribute("*", "*", "*");
+            config.EnableCors(cors);
+            
             config.DependencyResolver = new AutofacWebApiDependencyResolver(Program.Container);
 
             appBuilder.UseWebApi(config);

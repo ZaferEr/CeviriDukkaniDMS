@@ -5,13 +5,14 @@ using System.Linq;
 using System.Reflection;
 using DMS.Business.Extensions;
 using log4net;
+using MongoDB.Bson;
+using MongoDB.Bson.Serialization.Attributes;
 using MongoDB.Driver;
 using Tangent.CeviriDukkani.Data.Model;
 using Tangent.CeviriDukkani.Domain.Common;
 using Tangent.CeviriDukkani.Domain.Dto.Audit;
 using Tangent.CeviriDukkani.Domain.Dto.Document;
 using Tangent.CeviriDukkani.Domain.Dto.Response;
-using Tangent.CeviriDukkani.Domain.Entities.Audit;
 using Tangent.CeviriDukkani.Domain.Entities.Document;
 using Tangent.CeviriDukkani.Domain.Exceptions;
 using Tangent.CeviriDukkani.Domain.Exceptions.ExceptionCodes;
@@ -505,7 +506,7 @@ namespace DMS.Business.Services
                     .ToList()
                     .Select(x => new DocumentAuditDto()
                     {
-                        Id = x.Id,
+                        //Id = x.Id,
                         DocumentId = x.DocumentId,
                         Date = x.Date,
                         Message = x.Message,
@@ -556,5 +557,16 @@ namespace DMS.Business.Services
 
             throw new NotSupportedException("Bu doküman tipi desteklenmiyor.");
         }
+    }
+
+    public class DocumentAudit
+    {
+        [BsonId]
+        public ObjectId Id { get; set; }
+
+        public int DocumentId { get; set; }
+        public string Message { get; set; }
+        public string Status { get; set; }
+        public DateTime Date { get; set; }
     }
 }
