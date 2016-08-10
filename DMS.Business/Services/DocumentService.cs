@@ -369,16 +369,16 @@ namespace DMS.Business.Services
             return serviceResult;
         }
 
-        public ServiceResult<DocumentUploadResponseDto> AnalyzeDocument(string localFolder, string fileName)
+        public ServiceResult<DocumentUploadResponseDto> AnalyzeDocument(string fileFullPath)
         {
             var result = new DocumentUploadResponseDto();
+            result.FilePath = fileFullPath;
             var serviceResult = new ServiceResult<DocumentUploadResponseDto>();
             try
             {
-                result.FilePath = fileName;
-                if (fileName.IsDocumentExtension())
+                if (fileFullPath.IsDocumentExtension())
                 {
-                    IDocumentParser parser = GetDocumentParser(localFolder);
+                    IDocumentParser parser = GetDocumentParser(fileFullPath);
                     var parsedDoc = parser.Parse();
                     var stringParser = new StringParser(parsedDoc.ToString());
                     result.PageCount = parsedDoc.TotalPageNumber;
@@ -387,7 +387,7 @@ namespace DMS.Business.Services
                 }
                 else
                 {
-                    ITextParser parser = GetTextParser(fileName);
+                    ITextParser parser = GetTextParser(fileFullPath);
                     var parsedDoc = parser.Parse();
                     var stringParser = new StringParser(parsedDoc);
                     result.PageCount = 1;
