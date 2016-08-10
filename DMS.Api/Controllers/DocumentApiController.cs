@@ -34,9 +34,7 @@ namespace DMS.Api.Controllers {
                 {
                     var filePath = SaveFile(file);
 
-                    var fileExtension = file.Headers.ContentDisposition.FileName.GetExtensionOfFile().Replace("\"", string.Empty);
-                    var newGuid = Guid.NewGuid();
-                    var uploadFolder = $"{AppDomain.CurrentDomain.BaseDirectory}/{uploadPath}";
+                    var uploadResponseDto = _documentService.AnalyzeDocument(filePath);
 
                     return Request.CreateResponse(HttpStatusCode.OK, uploadResponseDto);
                 }
@@ -237,9 +235,9 @@ namespace DMS.Api.Controllers {
         }
 
         [HttpGet, Route("analyzeDocument")]
-        public HttpResponseMessage AnalyzeDocument([FromUri]string localFolder, [FromUri]string fileName)
+        public HttpResponseMessage AnalyzeDocument([FromUri]string fileFullPath)
         {
-            var serviceResult = _documentService.AnalyzeDocument(localFolder, fileName);
+            var serviceResult = _documentService.AnalyzeDocument(fileFullPath);
 
             if (serviceResult.ServiceResultType != ServiceResultType.Success)
                 return Error();
