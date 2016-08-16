@@ -368,7 +368,7 @@ namespace DMS.Business.Services {
                         Path = translationDocument.Path,
                         Active = true,
                         Content = a,
-                        CharWithSpaceCount = charCountWithSpace,
+                        CharCountWithSpaces = charCountWithSpace,
                         CharCount = charCOunt,
                         CreatedAt = DateTime.Now,
                         CreatedBy = createdBy
