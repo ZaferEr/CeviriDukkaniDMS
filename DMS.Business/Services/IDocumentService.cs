@@ -18,7 +18,7 @@ namespace DMS.Business.Services {
         ServiceResult<UserDocumentDto> GetUserDocument(int documentId);
         ServiceResult<UserDocumentDto> EditUserDocument(UserDocumentDto documentDto, int createdBy);
         ServiceResult<List<UserDocumentDto>> GetUserDocuments();
-        ServiceResult<DocumentUploadResponseDto> AnalyzeDocument(string localFolder, string fileName);
+        ServiceResult<DocumentUploadResponseDto> AnalyzeDocument(string fileFullPath);
         ServiceResult<List<TranslationDocumentPartDto>> GetDocumentPartsNormalized(int translationDocumentId, int partCount, int createdBy);
         ServiceResult<TranslationDocumentPartDto> GetTranslationDocumentPartById(int translationDocumentPartId);
         ServiceResult<List<DocumentAuditDto>> GetDocumentAudits(int documentId);

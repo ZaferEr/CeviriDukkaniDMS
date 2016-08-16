@@ -304,21 +304,26 @@ namespace DMS.Business.Services {
             return serviceResult;
         }
 
-        public ServiceResult<DocumentUploadResponseDto> AnalyzeDocument(string localFolder, string fileName) {
-            //C:\\Uploads\x.pdf
+        public ServiceResult<DocumentUploadResponseDto> AnalyzeDocument(string fileFullPath)
+        {
             var result = new DocumentUploadResponseDto();
+            result.FilePath = fileFullPath;
             var serviceResult = new ServiceResult<DocumentUploadResponseDto>();
-            try {
-                result.FilePath = fileName;
-                if (fileName.IsDocumentExtension()) {
-                    IDocumentParser parser = GetDocumentParser(localFolder);
+            try
+            {
+                result.FilePath = fileFullPath;
+                if (fileFullPath.IsDocumentExtension())
+                {
+                    IDocumentParser parser = GetDocumentParser(fileFullPath);
                     var parsedDoc = parser.Parse();
                     var stringParser = new StringParser(parsedDoc.ToString());
                     result.PageCount = parsedDoc.TotalPageNumber;
                     result.CharCountWithSpaces = stringParser.GenerateCharacterCount();
                     result.CharCount = stringParser.GenerateCharacterCount(withoutWhitespaces: true);
-                } else {
-                    ITextParser parser = GetTextParser(fileName);
+                }
+                else
+                {
+                    ITextParser parser = GetTextParser(fileFullPath);
                     var parsedDoc = parser.Parse();
                     var stringParser = new StringParser(parsedDoc);
                     result.PageCount = 1;

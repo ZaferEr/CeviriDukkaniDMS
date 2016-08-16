@@ -22,49 +22,66 @@ namespace DMS.Api.Controllers {
             _documentService = documentService;
         }
 
-        [HttpPost, Route("uploadDocument")]
-        public HttpResponseMessage UploadDocument(HttpRequestMessage request) {
-            try {
+        [HttpPost, Route("uploadTranslationDocument")]
+        public HttpResponseMessage UploadTranslationDocument(HttpRequestMessage request)
+        {
+            try
+            {
                 var requestFromBase = Request;
 
                 var multipartStream = requestFromBase.Content.ReadAsMultipartAsync().Result;
-                foreach (var file in multipartStream.Contents) {
-                    var filename = file.Headers.ContentDisposition.FileName.Trim('\"');
-                    var buffer = file.ReadAsByteArrayAsync().Result;
-                    var uploadPath = ConfigurationManager.AppSettings["UploadDocumentPath"];
+                foreach (var file in multipartStream.Contents)
+                {
+                    var filePath = SaveFile(file);
 
-                    var fileExtension = file.Headers.ContentDisposition.FileName.GetExtensionOfFile().Replace("\"", string.Empty);
-                    var newGuid = Guid.NewGuid();
-                    var uploadFolder = $"E://{uploadPath}";
-
-                    bool exists = Directory.Exists(uploadFolder);
-
-                    if (!exists)
-                        Directory.CreateDirectory(uploadFolder);
-
-                    var filePath = $"{uploadFolder}/{newGuid}.{fileExtension}";
-                    File.WriteAllBytes(filePath, buffer);
-
-                    ServiceResult<DocumentUploadResponseDto> uploadResponseDto = _documentService.AnalyzeDocument(filePath, $"/{uploadPath}/{newGuid}.{fileExtension}");
+                    var uploadResponseDto = _documentService.AnalyzeDocument(filePath);
 
                     return Request.CreateResponse(HttpStatusCode.OK, uploadResponseDto);
                 }
 
-                //var postedFile = httpRequest.Files[0];
-                //var fileExtension = postedFile.FileName.GetExtensionOfFile();
-                //var newGuid = Guid.NewGuid();
-                //var filePath = ConfigurationManager.AppSettings["UploadDocumentPath"] + newGuid + "." + fileExtension;
-                //var localPath = HttpContext.Current.Server.MapPath(filePath);
-                //postedFile.SaveAs(localPath);
-                //// NOTE: To store in memory use postedFile.InputStream
+                return Request.CreateResponse(HttpStatusCode.InternalServerError);
+            }
+            catch (System.Exception e)
+            {
+                return Request.CreateErrorResponse(HttpStatusCode.InternalServerError, e);
+            }
+        }
 
-                //ServiceResult<DocumentUploadResponseDto> uploadResponseDto = _documentService.AnalyzeDocument(localPath, filePath);
+        [HttpPost, Route("uploadDocument")]
+        public HttpResponseMessage UploadDocument(HttpRequestMessage request)
+        {
+            try
+            {
+                var requestFromBase = Request;
 
-                //// Send OK Response along with saved file names to the client.
+                var multipartStream = requestFromBase.Content.ReadAsMultipartAsync().Result;
+                foreach (var file in multipartStream.Contents)
+                {
+                    var filePath = SaveFile(file);
+
+                    return Request.CreateResponse(HttpStatusCode.OK, filePath);
+                }
+
                 return Request.CreateResponse(HttpStatusCode.InternalServerError);
             } catch (System.Exception e) {
                 return Request.CreateErrorResponse(HttpStatusCode.InternalServerError, e);
             }
+        }
+
+        private string SaveFile(HttpContent file)
+        {
+            var buffer = file.ReadAsByteArrayAsync().Result;
+            var uploadPath = ConfigurationManager.AppSettings["UploadDocumentPath"];
+
+            var fileExtension = file.Headers.ContentDisposition.FileName.GetExtensionOfFile().Replace("\"", string.Empty);
+            
+            if (!Directory.Exists(uploadPath))
+                Directory.CreateDirectory(uploadPath);
+
+            var filePath = $"{uploadPath}/{Guid.NewGuid()}.{fileExtension}";
+            File.WriteAllBytes(filePath, buffer);
+
+            return filePath;
         }
 
         [HttpPost, Route("addTranslationDocument")]
@@ -218,8 +235,9 @@ namespace DMS.Api.Controllers {
         }
 
         [HttpGet, Route("analyzeDocument")]
-        public HttpResponseMessage AnalyzeDocument([FromUri]string localFolder, [FromUri]string fileName) {
-            var serviceResult = _documentService.AnalyzeDocument(localFolder, fileName);
+        public HttpResponseMessage AnalyzeDocument([FromUri]string fileFullPath)
+        {
+            var serviceResult = _documentService.AnalyzeDocument(fileFullPath);
 
             if (serviceResult.ServiceResultType != ServiceResultType.Success)
                 return Error();
